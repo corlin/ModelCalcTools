@@ -6,6 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:worker": "npm run worker:build",
+    "worker:build": "tsc --project tsconfig.worker.json",
+    "worker:test": "node scripts/test-worker.cjs",
+    "worker:test-endpoints": "node scripts/test-worker-endpoints.cjs",
+    "worker:dev": "npx wrangler dev",
+    "worker:deploy": "npx wrangler deploy",
+    "pages:build": "node scripts/build-pages.cjs",
+    "pages:test": "node scripts/test-pages.cjs",
+    "pages:preview": "npx wrangler pages dev dist",
+    "pages:deploy": "npx wrangler pages deploy dist",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
@@ -20,6 +30,7 @@
     "react-hook-form": "^7.61.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250726.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -32,6 +43,7 @@
     "jest-environment-jsdom": "^30.0.5",
     "ts-jest": "^29.4.0",
     "typescript": "^5.0.0",
-    "vite": "^4.4.0"
+    "vite": "^4.4.0",
+    "wrangler": "^4.26.0"
   }
 }
