@@ -70,7 +70,7 @@ export const formatDuration = (seconds: number): string => {
 /**
  * 格式化价格显示
  */
-export const formatPrice = (price: number, currency: string = '$'): string => {
+export const formatPrice = (price: number, currency: string = '¥'): string => {
   if (price >= 1000000) {
     return `${currency}${(price / 1000000).toFixed(1)}M`;
   } else if (price >= 1000) {

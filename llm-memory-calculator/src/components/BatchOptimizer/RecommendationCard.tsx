@@ -1,10 +1,11 @@
 import React from 'react';
 import { BatchOptimizationResult } from '../../types';
-
+import { BATCH_OPTIMIZATION_DEFAULTS } from '../../constants';
 
 export interface RecommendationCardProps {
   result: BatchOptimizationResult;
   currentBatchSize: number;
+  targetMemory?: number;
   onApply: (batchSize: number) => void;
   onAutoOptimize: () => void;
   isOptimizing: boolean;
@@ -13,12 +14,13 @@ export interface RecommendationCardProps {
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   result,
   currentBatchSize,
+  targetMemory = BATCH_OPTIMIZATION_DEFAULTS.MAX_MEMORY_GB,
   onApply,
   onAutoOptimize,
   isOptimizing
 }) => {
   const isCurrentOptimal = currentBatchSize === result.optimalBatchSize;
-  const memoryUtilization = result.memoryUsage / 24 * 100; // 假设24GB显存，result.memoryUsage已经是GB单位
+  const memoryUtilization = (result.memoryUsage / targetMemory) * 100;
 
   return (
     <div className="recommendation-card">
@@ -72,12 +74,13 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           </div>
         </div>
 
-        {result.throughputEstimate && (
+        {/* 吞吐量估算功能暂时移除 */}
+        {false && (
           <div className="metric-group">
             <div className="metric-item">
               <div className="metric-label">预估吞吐量</div>
               <div className="metric-value">
-                {result.throughputEstimate.toFixed(1)} tokens/s
+                N/A tokens/s
               </div>
             </div>
             

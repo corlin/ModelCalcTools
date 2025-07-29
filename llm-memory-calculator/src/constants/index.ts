@@ -146,8 +146,26 @@ export const ERROR_MESSAGES = {
 export const CALCULATION_CONSTANTS = {
   // 激活值计算中的安全系数
   ACTIVATION_SAFETY_FACTOR: 1.2,
-  // KV缓存的额外内存系数
+  // KV缓存的额外内存系数（已废弃，直接在计算中使用2）
   KV_CACHE_FACTOR: 2,
-  // 中间激活值的估算系数
+  // 中间激活值的估算系数（前馈网络通常是4倍隐藏维度）
   INTERMEDIATE_ACTIVATION_FACTOR: 4,
+};
+
+// 批处理优化默认配置
+export const BATCH_OPTIMIZATION_DEFAULTS = {
+  MAX_MEMORY_GB: 48,           // 默认最大内存
+  SAFETY_MARGIN: 0.9,          // 安全边距
+  MAX_BATCH_SIZE: 128,         // 最大批处理大小
+  MIN_BATCH_SIZE: 1,           // 最小批处理大小
+  MEMORY_STEP_SIZE: 2,         // 内存步长
+};
+
+// GPU内存配置
+export const GPU_MEMORY_CONFIGS = {
+  RTX_4090: 24,
+  A100_40GB: 40,
+  A100_80GB: 80,
+  H100: 80,
+  DEFAULT: 48,                 // 默认配置
 };

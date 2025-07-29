@@ -120,7 +120,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
         <div className="header-controls">
           <div className="filter-controls">
             <div className="budget-filter">
-              <label htmlFor="budget-filter">预算上限 ($)</label>
+              <label htmlFor="budget-filter">预算上限 (¥)</label>
               <input
                 id="budget-filter"
                 type="number"

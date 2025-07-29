@@ -355,57 +355,158 @@
   margin-bottom: 1.5rem;
   background: white;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.5rem;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .chart-container {
-  height: 300px;
-  margin-bottom: 1rem;
+  height: 400px;
+  margin-bottom: 1.5rem;
 }
 
+/* 增强的图表说明 */
 .chart-legend {
   border-top: 1px solid #e5e7eb;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.legend-section {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.legend-section h5 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .legend-items {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #374151;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: #4b5563;
 }
 
+/* 批处理大小标识 */
 .legend-marker {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
+  border: 2px solid transparent;
+  flex-shrink: 0;
 }
 
 .legend-marker.current {
   background: #ef4444;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 .legend-marker.optimal {
   background: #10b981;
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
-.legend-marker.limit {
+/* 内存状态标识 */
+.legend-marker.safe {
+  background: #10b981;
+  border-color: #059669;
+}
+
+.legend-marker.warning {
+  background: #f59e0b;
+  border-color: #d97706;
+}
+
+.legend-marker.danger {
   background: #ef4444;
-  border: 2px dashed #dc2626;
-  background: transparent;
+  border-color: #dc2626;
 }
 
-.legend-marker.exceeded {
-  background: rgba(239, 68, 68, 0.6);
+/* 图表线条说明 */
+.legend-line {
+  width: 24px;
+  height: 3px;
+  flex-shrink: 0;
+}
+
+.legend-line.solid {
+  background: #3b82f6;
+  border-radius: 1.5px;
+}
+
+.legend-line.dashed-red {
+  background: repeating-linear-gradient(
+    to right,
+    #ef4444 0px,
+    #ef4444 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  height: 3px;
+}
+
+.legend-line.dashed-yellow {
+  background: repeating-linear-gradient(
+    to right,
+    #f59e0b 0px,
+    #f59e0b 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  height: 3px;
+}
+
+/* 数据统计摘要 */
+.chart-summary {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.stat-label {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 /* 详细分析样式 */
@@ -452,6 +553,70 @@
   font-size: 0.875rem;
   color: #4b5563;
   line-height: 1.5;
+}
+
+/* 优化错误显示 */
+.optimization-error {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.optimization-error .error-icon {
+  font-size: 1.5rem;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.optimization-error .error-content h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.optimization-error .error-content p {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+.optimization-error .error-warnings {
+  margin: 0 0 1rem 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.optimization-error .error-warnings li {
+  font-size: 0.8125rem;
+  color: #991b1b;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
+}
+
+.optimization-error .error-recommendations h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+
+.optimization-error .error-recommendations ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.optimization-error .error-recommendations li {
+  font-size: 0.8125rem;
+  color: #991b1b;
+  line-height: 1.4;
+  margin-bottom: 0.25rem;
 }
 
 /* 优化警告 */

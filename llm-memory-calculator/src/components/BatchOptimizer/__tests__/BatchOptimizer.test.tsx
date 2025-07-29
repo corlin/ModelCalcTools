@@ -37,7 +37,10 @@ jest.mock('../../../utils/memoryCalculator', () => ({
   optimizeBatchSize: jest.fn((params, maxMemory) => ({
     optimalBatchSize: 8,
     memoryUsage: maxMemory * 0.8, // GB单位
-    warning: params.batchSize > 32 ? '批处理大小过大，可能影响收敛性' : undefined
+    utilizationRate: 0.8,
+    analysisData: [],
+    warnings: params.batchSize > 32 ? ['批处理大小过大，可能影响收敛性'] : [],
+    recommendations: []
   }))
 }));
 
@@ -157,23 +160,29 @@ describe('OptimizationChart Component', () => {
     {
       batchSize: 1,
       memoryUsage: 8, // 8GB
-      throughputEstimate: 50,
+      utilizationRate: 8/24,
       isOptimal: false,
-      exceedsLimit: false
+      exceedsLimit: false,
+      safetyMarginExceeded: false,
+      estimatedThroughput: 50
     },
     {
       batchSize: 4,
       memoryUsage: 16, // 16GB
-      throughputEstimate: 120,
+      utilizationRate: 16/24,
       isOptimal: true,
-      exceedsLimit: false
+      exceedsLimit: false,
+      safetyMarginExceeded: false,
+      estimatedThroughput: 120
     },
     {
       batchSize: 8,
       memoryUsage: 32, // 32GB
-      throughputEstimate: 180,
+      utilizationRate: 32/24,
       isOptimal: false,
-      exceedsLimit: true
+      exceedsLimit: true,
+      safetyMarginExceeded: true,
+      estimatedThroughput: 180
     }
   ];
 
@@ -188,10 +197,10 @@ describe('OptimizationChart Component', () => {
     );
 
     expect(screen.getByTestId('optimization-chart')).toBeInTheDocument();
-    expect(screen.getByText('当前批处理大小')).toBeInTheDocument();
-    expect(screen.getByText('推荐批处理大小')).toBeInTheDocument();
-    expect(screen.getByText('内存限制')).toBeInTheDocument();
-    expect(screen.getByText('超出限制')).toBeInTheDocument();
+    expect(screen.getByText('当前批处理大小 (1)')).toBeInTheDocument();
+    expect(screen.getByText('推荐批处理大小 (4)')).toBeInTheDocument();
+    expect(screen.getByText('内存限制线 (24GB)')).toBeInTheDocument();
+    expect(screen.getByText('超出内存限制 (>24GB)')).toBeInTheDocument();
   });
 
   test('应该正确传递图表数据', () => {
@@ -208,7 +217,7 @@ describe('OptimizationChart Component', () => {
     const chartData = JSON.parse(chart.getAttribute('data-chart-data') || '{}');
 
     expect(chartData.labels).toEqual(['1', '4', '8']);
-    expect(chartData.datasets).toHaveLength(2); // 内存使用和吞吐量
+    expect(chartData.datasets).toHaveLength(4); // 内存使用、安全边距、内存限制、吞吐量
   });
 });
 
@@ -220,6 +229,24 @@ describe('RecommendationCard Component', () => {
   const mockResult: BatchOptimizationResult = {
     optimalBatchSize: 8,
     memoryUsage: 19.2, // 19.2GB
+    utilizationRate: 0.8,
+    analysisData: [],
+    warnings: [],
+    recommendations: [],
+    performanceEstimate: {
+      throughputImprovement: 25,
+      memoryEfficiency: 80,
+      recommendedForTraining: true,
+      recommendedForInference: true
+    },
+    validation: {
+      isValid: true,
+      warnings: [],
+      recommendations: [],
+      confidence: 'high'
+    },
+    safetyMargin: 0.9,
+    maxMemoryLimit: 48
   };
 
   beforeEach(() => {
@@ -357,6 +384,53 @@ describe('RecommendationCard Component', () => {
 
     expect(screen.getByText('💡 优化提示')).toBeInTheDocument();
     expect(screen.getByText(/更大的批处理大小通常能提高GPU利用率/)).toBeInTheDocument();
+  });
+
+  test('应该使用正确的targetMemory计算内存利用率', () => {
+    // Test with 48GB target memory (default)
+    const { rerender } = render(
+      <RecommendationCard
+        result={mockResult}
+        currentBatchSize={4}
+        targetMemory={48}
+        onApply={mockOnApply}
+        onAutoOptimize={mockOnAutoOptimize}
+        isOptimizing={false}
+      />
+    );
+
+    // With 19.2GB usage and 48GB target, utilization should be 40%
+    expect(screen.getByText('40.0%')).toBeInTheDocument();
+
+    // Test with 24GB target memory
+    rerender(
+      <RecommendationCard
+        result={mockResult}
+        currentBatchSize={4}
+        targetMemory={24}
+        onApply={mockOnApply}
+        onAutoOptimize={mockOnAutoOptimize}
+        isOptimizing={false}
+      />
+    );
+
+    // With 19.2GB usage and 24GB target, utilization should be 80%
+    expect(screen.getByText('80.0%')).toBeInTheDocument();
+  });
+
+  test('应该使用默认的48GB当未提供targetMemory时', () => {
+    render(
+      <RecommendationCard
+        result={mockResult}
+        currentBatchSize={4}
+        onApply={mockOnApply}
+        onAutoOptimize={mockOnAutoOptimize}
+        isOptimizing={false}
+      />
+    );
+
+    // With 19.2GB usage and default 48GB target, utilization should be 40%
+    expect(screen.getByText('40.0%')).toBeInTheDocument();
   });
 });
 

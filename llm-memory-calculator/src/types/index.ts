@@ -78,6 +78,26 @@ export interface ErrorState {
   errorField?: string;
 }
 
+// 批处理优化错误类型
+export type BatchOptimizationErrorCode = 
+  | 'INVALID_PARAMS' 
+  | 'CALCULATION_FAILED' 
+  | 'NO_FEASIBLE_SOLUTION'
+  | 'MEMORY_LIMIT_TOO_LOW'
+  | 'SAFETY_MARGIN_INVALID';
+
+// 批处理优化错误
+export class BatchOptimizationError extends Error {
+  constructor(
+    message: string,
+    public code: BatchOptimizationErrorCode,
+    public details?: any
+  ) {
+    super(message);
+    this.name = 'BatchOptimizationError';
+  }
+}
+
 // 计算器状态
 export interface CalculatorState {
   modelParams: ModelParameters;
@@ -99,10 +119,49 @@ export interface ChartData {
   }[];
 }
 
+// 批处理大小分析数据点
+export interface BatchAnalysisPoint {
+  batchSize: number;
+  memoryUsage: number;          // GB
+  utilizationRate: number;      // 0-1
+  withinLimit: boolean;
+  safetyMarginExceeded: boolean;
+  estimatedThroughput?: number; // tokens/s
+  memoryBreakdown?: {
+    weights: number;
+    activations: number;
+    gradients?: number;
+    optimizer?: number;
+  };
+}
+
+// 性能估算
+export interface PerformanceEstimate {
+  throughputImprovement: number; // 相对于当前配置的改进百分比
+  memoryEfficiency: number;      // 内存效率评分 (0-100)
+  recommendedForTraining: boolean;
+  recommendedForInference: boolean;
+}
+
+// 优化验证结果
+export interface OptimizationValidation {
+  isValid: boolean;
+  errorMessage?: string;
+  warnings: string[];
+  recommendations: string[];
+  confidence: 'high' | 'medium' | 'low'; // 结果可信度
+}
+
 // 批处理优化结果
 export interface BatchOptimizationResult {
   optimalBatchSize: number;
-  memoryUsage: number;          // 内存使用量 (GB)
-  throughputEstimate?: number;
-  warning?: string;
+  memoryUsage: number;          // GB
+  utilizationRate: number;      // 0-1
+  analysisData: BatchAnalysisPoint[];
+  warnings: string[];
+  recommendations: string[];
+  performanceEstimate?: PerformanceEstimate;
+  validation: OptimizationValidation;
+  safetyMargin: number;         // 使用的安全边距
+  maxMemoryLimit: number;       // 最大内存限制
 }

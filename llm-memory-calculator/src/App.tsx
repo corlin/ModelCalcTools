@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import { DEFAULT_MODEL_PARAMS } from './constants'
+import { DEFAULT_MODEL_PARAMS, BATCH_OPTIMIZATION_DEFAULTS } from './constants'
 import { ModelPreset, CalculationMode, MemoryCalculationResult, ModelParameters, ErrorState } from './types'
 import { calculateMemoryRequirements } from './utils/memoryCalculator'
 import { ModelInput } from './components/ModelInput'
@@ -309,7 +309,7 @@ function App() {
                 <BatchOptimizer
                   parameters={currentParams}
                   mode={calculationMode}
-                  maxMemoryGB={24}
+                  maxMemoryGB={BATCH_OPTIMIZATION_DEFAULTS.MAX_MEMORY_GB}
                   onBatchSizeChange={handleBatchSizeChange}
                 />
               </div>
@@ -320,7 +320,7 @@ function App() {
                 <HardwareRecommendation
                   result={memoryResult}
                   mode={calculationMode}
-                  budget={50000}
+                  budget={150000}
                 />
               </div>
             )}
