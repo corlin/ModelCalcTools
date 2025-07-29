@@ -21,6 +21,7 @@ export const MODEL_CATEGORY_LABELS: Record<ModelCategory, string> = {
   gpt: 'GPT系列',
   llama: 'LLaMA系列',
   bert: 'BERT系列',
+  deepseek: 'DeepSeek系列',
   other: '其他模型',
 };
 

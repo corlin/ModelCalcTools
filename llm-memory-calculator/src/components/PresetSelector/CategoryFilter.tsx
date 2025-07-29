@@ -21,6 +21,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       case 'gpt': return '🤖';
       case 'llama': return '🦙';
       case 'bert': return '📚';
+      case 'deepseek': return '🧠';
       case 'other': return '⚡';
       default: return '📦';
     }
@@ -32,6 +33,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       case 'gpt': return '#10b981';
       case 'llama': return '#3b82f6';
       case 'bert': return '#f59e0b';
+      case 'deepseek': return '#ec4899';
       case 'other': return '#8b5cf6';
       default: return '#6b7280';
     }
@@ -103,6 +105,8 @@ const getCategoryDescription = (category: ModelCategory): string => {
       return 'LLaMA系列开源模型，在多种任务上表现优异，支持多语言处理。';
     case 'bert':
       return 'BERT系列模型，专门用于自然语言理解任务，如文本分类和问答。';
+    case 'deepseek':
+      return 'DeepSeek系列模型，专注于推理优化和高性能计算，支持复杂推理任务。';
     case 'other':
       return '其他优秀的语言模型，包括各种专业化和创新的模型架构。';
     default:

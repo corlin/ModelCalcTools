@@ -2,7 +2,7 @@
 export type PrecisionType = 'fp32' | 'fp16' | 'int8' | 'int4';
 
 // 模型类别
-export type ModelCategory = 'gpt' | 'llama' | 'bert' | 'other';
+export type ModelCategory = 'gpt' | 'llama' | 'bert' | 'deepseek' | 'other';
 
 // 计算模式
 export type CalculationMode = 'inference' | 'training';
@@ -66,6 +66,9 @@ export interface ModelPreset {
   parameters: ModelParameters;  // 模型参数
   category: ModelCategory;      // 模型类别
   popular?: boolean;            // 是否为热门模型
+  tags?: string[];              // 标签，用于搜索和筛选
+  recommendedUseCase?: string;  // 推荐用例
+  specialFeatures?: string[];   // 特殊功能标签
 }
 
 // 错误状态

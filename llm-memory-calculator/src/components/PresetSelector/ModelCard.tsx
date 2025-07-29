@@ -24,6 +24,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
       case 'gpt': return '#10b981'; // 绿色
       case 'llama': return '#3b82f6'; // 蓝色
       case 'bert': return '#f59e0b'; // 橙色
+      case 'deepseek': return '#ec4899'; // 粉色
       case 'other': return '#8b5cf6'; // 紫色
       default: return '#6b7280'; // 灰色
     }
@@ -70,58 +71,85 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         </div>
       </div>
 
-      {/* 模型描述 */}
-      <p className="model-description">{model.description}</p>
+      {/* 可滚动内容区域 */}
+      <div className="model-card-content">
+        {/* 模型描述 */}
+        <p className="model-description">{model.description}</p>
 
-      {/* 关键参数 */}
-      <div className="model-key-params">
-        <div className="param-item">
-          <span className="param-label">参数量</span>
-          <span className="param-value">
-            {formatParameterCount(model.parameters.parameterCount)}
-          </span>
-        </div>
-        <div className="param-item">
-          <span className="param-label">精度</span>
-          <span className="param-value">
-            {model.parameters.precision.toUpperCase()}
-          </span>
-        </div>
-        <div className="param-item">
-          <span className="param-label">序列长度</span>
-          <span className="param-value">
-            {model.parameters.sequenceLength.toLocaleString()}
-          </span>
-        </div>
-      </div>
-
-      {/* 详细参数（可展开） */}
-      {showDetails && (
-        <div className="model-details">
-          <div className="details-grid">
-            <div className="detail-item">
-              <span className="detail-label">批处理大小</span>
-              <span className="detail-value">{model.parameters.batchSize}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">隐藏层维度</span>
-              <span className="detail-value">{model.parameters.hiddenSize.toLocaleString()}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">层数</span>
-              <span className="detail-value">{model.parameters.numLayers}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">词汇表大小</span>
-              <span className="detail-value">{model.parameters.vocabularySize.toLocaleString()}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">精度类型</span>
-              <span className="detail-value">{PRECISION_LABELS[model.parameters.precision]}</span>
-            </div>
+        {/* 关键参数 */}
+        <div className="model-key-params">
+          <div className="param-item">
+            <span className="param-label">参数量</span>
+            <span className="param-value">
+              {formatParameterCount(model.parameters.parameterCount)}
+            </span>
+          </div>
+          <div className="param-item">
+            <span className="param-label">精度</span>
+            <span className="param-value">
+              {model.parameters.precision.toUpperCase()}
+            </span>
+          </div>
+          <div className="param-item">
+            <span className="param-label">序列长度</span>
+            <span className="param-value">
+              {model.parameters.sequenceLength.toLocaleString()}
+            </span>
           </div>
         </div>
-      )}
+
+        {/* 标签和特殊功能 */}
+        {(model.tags || model.specialFeatures) && (
+          <div className="model-tags">
+            {model.tags && model.tags.slice(0, 3).map((tag, index) => (
+              <span key={index} className="model-tag">
+                {tag}
+              </span>
+            ))}
+            {model.specialFeatures && model.specialFeatures.slice(0, 2).map((feature, index) => (
+              <span key={index} className="special-feature-tag">
+                ⭐ {feature}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* 推荐用例 */}
+        {model.recommendedUseCase && (
+          <div className="recommended-use-case">
+            <span className="use-case-label">推荐用例:</span>
+            <span className="use-case-text">{model.recommendedUseCase}</span>
+          </div>
+        )}
+
+        {/* 详细参数（可展开） */}
+        {showDetails && (
+          <div className="model-details">
+            <div className="details-grid">
+              <div className="detail-item">
+                <span className="detail-label">批处理大小</span>
+                <span className="detail-value">{model.parameters.batchSize}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">隐藏层维度</span>
+                <span className="detail-value">{model.parameters.hiddenSize.toLocaleString()}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">层数</span>
+                <span className="detail-value">{model.parameters.numLayers}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">词汇表大小</span>
+                <span className="detail-value">{model.parameters.vocabularySize.toLocaleString()}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">精度类型</span>
+                <span className="detail-value">{PRECISION_LABELS[model.parameters.precision]}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* 选择指示器 */}
       {isSelected && (

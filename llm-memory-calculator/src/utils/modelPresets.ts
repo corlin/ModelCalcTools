@@ -1,6 +1,46 @@
 import { ModelPreset, ModelCategory } from '../types';
 
 export const MODEL_PRESETS: ModelPreset[] = [
+  // DeepSeek系列
+  {
+    id: 'deepseek-r1',
+    name: 'DeepSeek-R1',
+    description: '671B参数的DeepSeek推理优化模型，支持复杂推理任务',
+    parameters: {
+      parameterCount: 671,
+      precision: 'fp16',
+      sequenceLength: 8192,
+      batchSize: 1,
+      hiddenSize: 11008,
+      numLayers: 64,
+      vocabularySize: 102400
+    },
+    category: 'deepseek',
+    popular: true,
+    tags: ['推理优化', '大规模参数', '高性能', '671B', 'reasoning'],
+    recommendedUseCase: '复杂推理任务、代码生成、数学问题求解、逻辑推理',
+    specialFeatures: ['推理优化', '大规模参数', '高性能推理']
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-32b',
+    name: 'DeepSeek-R1-Distill-Qwen-32B',
+    description: '32B参数的DeepSeek蒸馏模型，基于Qwen架构优化',
+    parameters: {
+      parameterCount: 32,
+      precision: 'fp16',
+      sequenceLength: 8192,
+      batchSize: 1,
+      hiddenSize: 5120,
+      numLayers: 64,
+      vocabularySize: 151936
+    },
+    category: 'deepseek',
+    popular: true,
+    tags: ['蒸馏优化', '高效推理', 'Qwen架构', '32B', 'distilled'],
+    recommendedUseCase: '资源受限环境、快速推理、生产部署、高效对话',
+    specialFeatures: ['蒸馏优化', '高效推理', 'Qwen架构兼容']
+  },
+
   // GPT系列
   {
     id: 'gpt-3.5-turbo',

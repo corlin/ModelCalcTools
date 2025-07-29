@@ -50,6 +50,8 @@
 2. WHEN 用户选择预设模型 THEN 系统 SHALL 自动填充相应的参数
 3. WHEN 系统提供预设配置 THEN 系统 SHALL 包含GPT、LLaMA、BERT等主流模型
 4. WHEN 用户选择预设后 THEN 系统 SHALL 允许用户修改参数进行自定义
+5. WHEN 系统提供预设配置 THEN 系统 SHALL 包含DeepSeek-R1和DeepSeek-R1-Distill-Qwen-32B模型
+6. WHEN 用户浏览预设模型 THEN 系统 SHALL 提供优化的模型选择界面和搜索功能
 
 ### 需求 5 - 结果可视化
 
@@ -73,7 +75,20 @@
 3. WHEN 内存需求超过单卡限制 THEN 系统 SHALL 建议多卡配置方案
 4. WHEN 显示建议 THEN 系统 SHALL 包含不同价位的硬件选项
 
-### 需求 7 - 响应式界面
+### 需求 7 - DeepSeek模型支持和界面优化
+
+**用户故事：** 作为AI研究者，我希望能够使用最新的DeepSeek模型进行内存计算，并拥有更好的模型选择体验。
+
+#### 验收标准
+
+1. WHEN 用户查看预设模型 THEN 系统 SHALL 包含deepseek-ai/DeepSeek-R1模型配置
+2. WHEN 用户查看预设模型 THEN 系统 SHALL 包含deepseek-ai/DeepSeek-R1-Distill-Qwen-32B模型配置
+3. WHEN 用户使用模型选择界面 THEN 系统 SHALL 提供搜索和筛选功能
+4. WHEN 用户浏览模型 THEN 系统 SHALL 显示模型的关键信息和推荐标签
+5. WHEN 用户选择DeepSeek模型 THEN 系统 SHALL 正确计算其内存需求
+6. WHEN 模型列表较长时 THEN 系统 SHALL 提供分页或虚拟滚动优化
+
+### 需求 8 - 响应式界面
 
 **用户故事：** 作为移动设备用户，我希望在不同设备上都能正常使用该工具。
 

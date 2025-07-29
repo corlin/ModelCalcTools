@@ -103,7 +103,7 @@ interface MemoryBreakdown {
 }
 ```
 
-#### 5. PresetSelector (预设模型选择)
+#### 5. PresetSelector (预设模型选择) - 优化版本
 ```typescript
 interface PresetSelectorProps {
   onPresetSelect: (preset: ModelPreset) => void;
@@ -115,7 +115,27 @@ interface ModelPreset {
   name: string;
   description: string;
   parameters: ModelParameters;
-  category: 'gpt' | 'llama' | 'bert' | 'other';
+  category: 'gpt' | 'llama' | 'bert' | 'deepseek' | 'other';
+  popular?: boolean;
+  tags?: string[];  // 新增：用于搜索和筛选的标签
+}
+
+interface PresetSelectorState {
+  searchQuery: string;
+  selectedCategory: string | 'all';
+  showPopularOnly: boolean;
+  sortBy: 'name' | 'parameters' | 'category';
+}
+
+// 新增搜索和筛选功能
+interface ModelSearchFilters {
+  query: string;
+  category?: string;
+  popularOnly?: boolean;
+  parameterRange?: {
+    min: number;
+    max: number;
+  };
 }
 ```
 
@@ -169,6 +189,40 @@ const calculateTrainingMemory = (modelWeights: number): {
 ### 预设模型数据
 ```typescript
 export const MODEL_PRESETS: ModelPreset[] = [
+  // DeepSeek系列 - 新增
+  {
+    id: 'deepseek-r1',
+    name: 'DeepSeek-R1',
+    description: '671B参数的DeepSeek推理优化模型，支持复杂推理任务',
+    parameters: {
+      parameterCount: 671,
+      precision: 'fp16',
+      sequenceLength: 8192,
+      batchSize: 1,
+      hiddenSize: 11008,
+      numLayers: 64,
+      vocabularySize: 102400
+    },
+    category: 'other',
+    popular: true
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-32b',
+    name: 'DeepSeek-R1-Distill-Qwen-32B',
+    description: '32B参数的DeepSeek蒸馏模型，基于Qwen架构优化',
+    parameters: {
+      parameterCount: 32,
+      precision: 'fp16',
+      sequenceLength: 8192,
+      batchSize: 1,
+      hiddenSize: 5120,
+      numLayers: 64,
+      vocabularySize: 151936
+    },
+    category: 'other',
+    popular: true
+  },
+  // GPT系列
   {
     id: 'gpt-3.5',
     name: 'GPT-3.5',
@@ -254,6 +308,76 @@ const validateModelParameters = (params: ModelParameters): ErrorState => {
 - **端到端测试**: Playwright
 - **性能测试**: Lighthouse CI
 
+## 优化的预设模型选择界面设计
+
+### 界面布局
+```typescript
+interface EnhancedPresetSelectorLayout {
+  searchBar: {
+    placeholder: string;
+    debounceMs: number;
+    clearButton: boolean;
+  };
+  filterPanel: {
+    categoryFilter: boolean;
+    popularToggle: boolean;
+    parameterRangeSlider: boolean;
+    sortOptions: string[];
+  };
+  modelGrid: {
+    itemsPerPage: number;
+    virtualScrolling: boolean;
+    cardLayout: 'compact' | 'detailed';
+  };
+}
+```
+
+### 搜索功能实现
+```typescript
+const useModelSearch = (models: ModelPreset[], filters: ModelSearchFilters) => {
+  return useMemo(() => {
+    return models.filter(model => {
+      // 文本搜索
+      const matchesQuery = !filters.query || 
+        model.name.toLowerCase().includes(filters.query.toLowerCase()) ||
+        model.description.toLowerCase().includes(filters.query.toLowerCase()) ||
+        model.tags?.some(tag => tag.toLowerCase().includes(filters.query.toLowerCase()));
+      
+      // 类别筛选
+      const matchesCategory = !filters.category || 
+        filters.category === 'all' || 
+        model.category === filters.category;
+      
+      // 热门筛选
+      const matchesPopular = !filters.popularOnly || model.popular;
+      
+      // 参数范围筛选
+      const matchesParameterRange = !filters.parameterRange ||
+        (model.parameters.parameterCount >= filters.parameterRange.min &&
+         model.parameters.parameterCount <= filters.parameterRange.max);
+      
+      return matchesQuery && matchesCategory && matchesPopular && matchesParameterRange;
+    });
+  }, [models, filters]);
+};
+```
+
+### DeepSeek模型特殊处理
+```typescript
+const DEEPSEEK_MODELS = {
+  'deepseek-r1': {
+    specialFeatures: ['推理优化', '大规模参数', '高性能'],
+    recommendedUseCase: '复杂推理任务、代码生成、数学问题求解',
+    memoryOptimization: 'fp16精度下优化内存使用'
+  },
+  'deepseek-r1-distill-qwen-32b': {
+    specialFeatures: ['蒸馏优化', '高效推理', 'Qwen架构'],
+    recommendedUseCase: '资源受限环境、快速推理、生产部署',
+    memoryOptimization: '相比原版模型显著减少内存需求'
+  }
+};
+```
+
 ## 性能优化
 
 ### 计算优化
@@ -263,13 +387,14 @@ const validateModelParameters = (params: ModelParameters): ErrorState => {
 
 ### 渲染优化
 - React.memo优化组件重渲染
-- 虚拟化长列表（如果需要）
+- 虚拟化长列表（模型选择器）
 - 代码分割和懒加载
 
 ### 用户体验
 - 加载状态指示器
 - 平滑的动画过渡
 - 错误边界处理
+- 搜索结果高亮显示
 
 ## 部署和维护
 
