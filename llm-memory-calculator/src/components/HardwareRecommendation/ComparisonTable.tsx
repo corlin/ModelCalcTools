@@ -206,16 +206,17 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
             <tr>
               <td className="row-label">显存余量</td>
               {recommendations.map(rec => {
-                const remainingMemory = rec.memorySize * 1024 * 1024 * 1024 - memoryNeeded;
+                const remainingMemoryBytes = rec.memorySize * 1024 * 1024 * 1024 - memoryNeeded;
+                const remainingMemoryGB = remainingMemoryBytes / (1024 * 1024 * 1024);
                 return (
                   <td key={`remaining-${rec.id}`} className="data-cell">
-                    {remainingMemory > 0 ? (
+                    {remainingMemoryBytes > 0 ? (
                       <span className="positive-remaining">
-                        +{formatMemorySize(remainingMemory)}
+                        +{formatMemorySize(remainingMemoryGB)}
                       </span>
                     ) : (
                       <span className="negative-remaining">
-                        {formatMemorySize(Math.abs(remainingMemory))}
+                        {formatMemorySize(Math.abs(remainingMemoryGB))}
                       </span>
                     )}
                   </td>

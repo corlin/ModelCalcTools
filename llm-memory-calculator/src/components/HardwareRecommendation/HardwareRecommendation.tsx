@@ -1,8 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { MemoryCalculationResult, CalculationMode, HardwareRecommendation as HardwareRec } from '../../types';
-import { formatMemorySize, formatPrice } from '../../utils/formatters';
-import { GPU_HARDWARE } from '../../constants';
+import { formatPrice } from '../../utils/formatters';
+import { MemoryUnitConverter } from '../../utils/MemoryUnitConverter';
+import { ENHANCED_GPU_HARDWARE } from '../../constants';
+import { gpuDataValidator } from '../../utils/gpuDataValidator';
 import { HardwareCard } from './HardwareCard';
+import { WorkloadType } from '../../utils/efficiencyRatingSystem';
+import { gpuEfficiencyUpdater } from '../../utils/gpuEfficiencyUpdater';
+import { UtilizationCalculator, UtilizationResult, MultiCardResult, DEFAULT_UTILIZATION_CONFIG } from '../../utils/utilizationCalculator';
 import { ComparisonTable } from './ComparisonTable';
 import { CostAnalysis } from './CostAnalysis';
 import './HardwareRecommendation.css';
@@ -26,32 +31,109 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
   const [showComparison, setShowComparison] = useState(false);
   const [sortBy, setSortBy] = useState<'price' | 'memory' | 'efficiency'>('efficiency');
   const [filterBudget, setFilterBudget] = useState(budget || 0);
+  
+  // 创建利用率计算器实例
+  const utilizationCalculator = useMemo(() => new UtilizationCalculator(), []);
 
-  // 计算总内存需求
-  const totalMemoryNeeded = useMemo(() => {
+  // 计算总内存需求（以GB为单位）
+  const totalMemoryNeededGB = useMemo(() => {
     if (!result) return 0;
     return mode === 'inference' ? result.inference.total : result.training.total;
   }, [result, mode]);
 
+  // 计算总内存需求（以字节为单位，用于标准化计算）
+  const totalMemoryNeededBytes = useMemo(() => {
+    return MemoryUnitConverter.gbToBytes(totalMemoryNeededGB);
+  }, [totalMemoryNeededGB]);
+
   // 生成硬件推荐
   const recommendations = useMemo(() => {
-    if (!result || totalMemoryNeeded === 0) return [];
+    if (!result || totalMemoryNeededGB === 0) return [];
 
-    const memoryGB = totalMemoryNeeded / (1024 * 1024 * 1024);
+    // 使用已经计算好的GB值
+    const memoryGB = totalMemoryNeededGB;
+    const gpuMemoryBytes = (gpu: any) => MemoryUnitConverter.gbToBytes(gpu.memorySize);
     
-    return GPU_HARDWARE.map(gpu => {
-      const suitable = gpu.memorySize >= memoryGB;
-      const multiCardRequired = suitable ? 1 : Math.ceil(memoryGB / gpu.memorySize);
-      const totalCost = gpu.price * multiCardRequired;
-      const memoryUtilization = Math.min((memoryGB / (gpu.memorySize * multiCardRequired)) * 100, 100);
+    // 验证并过滤有效的GPU数据，同时更新效率评级
+    const workloadType: WorkloadType = mode === 'inference' ? 'inference' : 'training';
+    const validGPUs = ENHANCED_GPU_HARDWARE
+      .filter(gpu => {
+        const validation = gpuDataValidator.validateGPUData(gpu);
+        return validation.isValid && validation.confidence > 0.5; // 只使用可信度大于50%的数据
+      })
+      .map(gpu => gpuEfficiencyUpdater.updateGPUEfficiency(gpu, workloadType));
+    
+    return validGPUs.map(gpu => {
+      // 使用标准化利用率计算
+      const standardizedUtilization = UtilizationCalculator.calculateStandardizedUtilization(
+        totalMemoryNeededBytes,
+        gpuMemoryBytes(gpu),
+        DEFAULT_UTILIZATION_CONFIG
+      );
       
-      // 计算效率评分
-      let efficiencyScore = 0;
+      // 重新定义"suitable"：基于标准化利用率计算
+      const theoreticallyEnough = gpu.memorySize >= memoryGB;
+      const practicallyFeasible = !standardizedUtilization.isOverCapacity;
+      const suitable = theoreticallyEnough && practicallyFeasible;
+      
+      const multiCardRequired = suitable ? 1 : Math.ceil(memoryGB / gpu.memorySize);
+      const totalCost = gpu.price.currentPrice * multiCardRequired;
+      
+      // 计算利用率和相关详情
+      let finalUtilizationResult: UtilizationResult | undefined;
+      let multiCardResult: MultiCardResult | undefined;
+      let memoryUtilization: number;
+      
       if (suitable) {
-        efficiencyScore = (memoryUtilization / 100) * 0.4 + // 内存利用率权重40%
-                         (gpu.efficiency === 'high' ? 1 : gpu.efficiency === 'medium' ? 0.7 : 0.4) * 0.3 + // 硬件效率权重30%
-                         (1 / multiCardRequired) * 0.3; // 单卡优势权重30%
+        // 单卡配置：使用标准化利用率
+        memoryUtilization = standardizedUtilization.utilizationPercentage;
+        
+        // 为了兼容性，也计算传统的利用率结果
+        finalUtilizationResult = utilizationCalculator.calculateRealUtilization(
+          memoryGB,
+          gpu.memorySize
+        );
+      } else {
+        // 多卡配置：计算多卡效率和利用率
+        multiCardResult = utilizationCalculator.calculateMultiCardEfficiency(
+          memoryGB,
+          gpu.memorySize,
+          multiCardRequired
+        );
+        
+        // 对于多卡配置，计算每卡的标准化利用率
+        const perCardMemoryBytes = totalMemoryNeededBytes / multiCardRequired;
+        const perCardUtilization = UtilizationCalculator.calculateStandardizedUtilization(
+          perCardMemoryBytes,
+          gpuMemoryBytes(gpu),
+          DEFAULT_UTILIZATION_CONFIG
+        );
+        
+        memoryUtilization = perCardUtilization.utilizationPercentage;
       }
+      
+      // 使用新的效率评级系统计算综合评分
+      const efficiencyRating = gpu.efficiency; // 已经通过gpuEfficiencyUpdater更新
+      let efficiencyScore = efficiencyRating.overall / 100; // 转换为0-1范围
+      
+      // 根据标准化利用率和多卡配置调整评分
+      if (suitable) {
+        // 基于标准化效率等级调整评分
+        const efficiencyBonus = standardizedUtilization.efficiencyRating === 'excellent' ? 0.1 :
+                               standardizedUtilization.efficiencyRating === 'good' ? 0.05 :
+                               standardizedUtilization.efficiencyRating === 'fair' ? 0.02 : 0;
+        const singleCardBonus = multiCardRequired === 1 ? 0.05 : 0; // 单卡配置加成
+        efficiencyScore = Math.min(1, efficiencyScore + efficiencyBonus + singleCardBonus);
+      } else {
+        // 多卡配置的效率惩罚
+        const multiCardPenalty = (multiCardRequired - 1) * 0.05;
+        efficiencyScore = Math.max(0, efficiencyScore - multiCardPenalty);
+      }
+
+      // 转换为旧的效率格式以保持兼容性
+      const legacyEfficiency: 'high' | 'medium' | 'low' = 
+        gpu.efficiency.overall >= 85 ? 'high' : 
+        gpu.efficiency.overall >= 70 ? 'medium' : 'low';
 
       return {
         id: gpu.id,
@@ -60,15 +142,31 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
         price: totalCost,
         suitable,
         multiCardRequired,
-        efficiency: gpu.efficiency,
-        description: generateDescription(gpu, multiCardRequired, suitable, memoryUtilization),
+        efficiency: legacyEfficiency,
+        description: generateEnhancedDescription(gpu, multiCardRequired, suitable, memoryUtilization, totalMemoryNeededBytes),
         memoryUtilization,
         efficiencyScore,
-        costPerGB: totalCost / (gpu.memorySize * multiCardRequired)
+        costPerGB: totalCost / (gpu.memorySize * multiCardRequired),
+        // 添加利用率详情
+        utilizationDetails: finalUtilizationResult,
+        multiCardDetails: multiCardResult,
+        standardizedUtilization, // 添加标准化利用率信息
+        
+        // 添加增强信息
+        enhancedData: {
+          architecture: gpu.architecture,
+          memoryBandwidth: gpu.memoryBandwidth,
+          tdp: gpu.tdp,
+          benchmarks: gpu.benchmarks,
+          confidence: gpuDataValidator.validateGPUData(gpu).confidence,
+          efficiencyRating: efficiencyRating
+        }
       } as HardwareRec & { 
         memoryUtilization: number; 
         efficiencyScore: number; 
         costPerGB: number;
+        enhancedData: any;
+        standardizedUtilization: any;
       };
     }).filter(rec => {
       if (filterBudget > 0 && rec.price > filterBudget) return false;
@@ -84,7 +182,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
           return b.efficiencyScore - a.efficiencyScore;
       }
     });
-  }, [result, totalMemoryNeeded, mode, filterBudget, sortBy]);
+  }, [result, totalMemoryNeededGB, totalMemoryNeededBytes, mode, filterBudget, sortBy, utilizationCalculator]);
 
   // 处理硬件选择
   const handleHardwareSelect = useCallback((hardware: HardwareRec) => {
@@ -113,7 +211,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
         <div className="header-title">
           <h3>GPU硬件推荐</h3>
           <span className="header-subtitle">
-            基于 {formatMemorySize(totalMemoryNeeded)} 内存需求的最佳硬件选择
+            基于 {totalMemoryNeededGB.toFixed(1)} GB 内存需求的最佳硬件选择
           </span>
         </div>
         
@@ -163,7 +261,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
           <div className="stat-icon">💾</div>
           <div className="stat-content">
             <div className="stat-label">内存需求</div>
-            <div className="stat-value">{formatMemorySize(totalMemoryNeeded)}</div>
+            <div className="stat-value">{totalMemoryNeededGB.toFixed(1)} GB</div>
           </div>
         </div>
         
@@ -219,7 +317,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
               rank={index + 1}
               isSelected={selectedHardware === hardware.id}
               onSelect={handleHardwareSelect}
-              memoryNeeded={totalMemoryNeeded}
+              memoryNeeded={totalMemoryNeededBytes}
             />
           ))
         )}
@@ -229,7 +327,7 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
       {showComparison && recommendations.length > 0 && (
         <ComparisonTable
           recommendations={recommendations.slice(0, 5)} // 只显示前5个
-          memoryNeeded={totalMemoryNeeded}
+          memoryNeeded={totalMemoryNeededBytes}
         />
       )}
 
@@ -294,27 +392,43 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
   );
 };
 
-// 生成硬件描述
-function generateDescription(
-  gpu: typeof GPU_HARDWARE[0], 
+// 生成增强的硬件描述
+function generateEnhancedDescription(
+  gpu: any, 
   multiCardRequired: number, 
   suitable: boolean, 
-  memoryUtilization: number
+  memoryUtilization: number,
+  totalMemoryNeededBytes: number
 ): string {
+  const performanceInfo = gpu.benchmarks?.llmInference ? 
+    ` (${gpu.benchmarks.llmInference.tokensPerSecond} tokens/s)` : '';
+  
+  // 内存需求已经是GB单位
+  const memoryNeededGB = MemoryUnitConverter.bytesToGB(totalMemoryNeededBytes);
+  const formattedMemoryNeeded = `${memoryNeededGB.toFixed(1)} GB`;
+  
   if (!suitable) {
-    return `需要 ${multiCardRequired} 张 ${gpu.name} 才能满足内存需求，建议考虑更大显存的GPU。`;
+    if (gpu.memorySize < memoryNeededGB) {
+      return `单卡显存不足，需要 ${multiCardRequired} 张 ${gpu.name} 才能满足 ${formattedMemoryNeeded} 的内存需求。${performanceInfo}`;
+    } else {
+      return `单卡显存理论上够用，但考虑实际开销后利用率过高，建议使用 ${multiCardRequired} 张卡或更大显存的GPU。${performanceInfo}`;
+    }
   }
   
   if (multiCardRequired === 1) {
+    const architectureInfo = gpu.architecture ? ` (${gpu.architecture}架构)` : '';
+    
     if (memoryUtilization > 90) {
-      return `${gpu.name} 可以满足需求，但内存利用率较高 (${memoryUtilization.toFixed(1)}%)，建议考虑更大显存的选择。`;
+      return `${gpu.name}${architectureInfo} 可以满足需求，但内存利用率较高 (${memoryUtilization.toFixed(1)}%)，建议考虑更大显存的选择。${performanceInfo}`;
     } else if (memoryUtilization > 70) {
-      return `${gpu.name} 是很好的选择，内存利用率适中 (${memoryUtilization.toFixed(1)}%)，性价比较高。`;
+      return `${gpu.name}${architectureInfo} 是很好的选择，内存利用率适中 (${memoryUtilization.toFixed(1)}%)，性价比较高。${performanceInfo}`;
     } else {
-      return `${gpu.name} 显存充足，内存利用率 ${memoryUtilization.toFixed(1)}%，适合未来扩展需求。`;
+      return `${gpu.name}${architectureInfo} 显存充足，内存利用率 ${memoryUtilization.toFixed(1)}%，适合未来扩展需求。${performanceInfo}`;
     }
   } else {
-    return `使用 ${multiCardRequired} 张 ${gpu.name} 组成多卡配置，总显存 ${gpu.memorySize * multiCardRequired}GB。`;
+    const totalMemoryGB = gpu.memorySize * multiCardRequired;
+    const formattedTotalMemory = MemoryUnitConverter.formatMemorySize(MemoryUnitConverter.gbToBytes(totalMemoryGB));
+    return `使用 ${multiCardRequired} 张 ${gpu.name} 组成多卡配置，总显存 ${formattedTotalMemory}。${performanceInfo}`;
   }
 }
 

@@ -11,6 +11,12 @@ import {
   BatchOptimizationError
 } from '../types';
 import { 
+  UtilizationCalculator, 
+  UtilizationResult, 
+  MultiCardResult,
+  DEFAULT_UTILIZATION_CONFIG 
+} from './utilizationCalculator';
+import { 
   PRECISION_BYTES, 
   MEMORY_UNITS, 
   OPTIMIZER_MEMORY_MULTIPLIERS,
@@ -84,34 +90,81 @@ export function calculateOptimizerStates(
 }
 
 /**
- * 生成硬件推荐
+ * 生成增强的硬件推荐
  * @param totalMemory 总内存需求 (GB)
  * @returns 硬件推荐列表
  */
 export function generateHardwareRecommendations(totalMemory: number): HardwareRecommendation[] {
   const recommendations: HardwareRecommendation[] = [];
+  const utilizationCalculator = new UtilizationCalculator();
   
   GPU_HARDWARE.forEach(gpu => {
     const suitable = gpu.memorySize >= totalMemory;
     const multiCardRequired = suitable ? 1 : Math.ceil(totalMemory / gpu.memorySize);
     
     let description = '';
+    let utilizationResult: UtilizationResult | null = null;
+    let multiCardResult: MultiCardResult | null = null;
+    
     if (suitable) {
-      const memoryUtilization = (totalMemory / gpu.memorySize * 100).toFixed(1);
-      description = `单卡可运行，内存利用率 ${memoryUtilization}%`;
+      // 计算单卡利用率
+      utilizationResult = utilizationCalculator.calculateRealUtilization(
+        totalMemory, 
+        gpu.memorySize, 
+        DEFAULT_UTILIZATION_CONFIG
+      );
+      
+      const theoreticalUtil = (utilizationResult.theoreticalUtilization * 100).toFixed(1);
+      const practicalUtil = (utilizationResult.practicalUtilization * 100).toFixed(1);
+      
+      description = `单卡可运行，理论利用率 ${theoreticalUtil}%，实际利用率 ${practicalUtil}%`;
+      
+      // 添加效率建议
+      if (utilizationResult.efficiency === 'high') {
+        description += ' (推荐配置)';
+      } else if (utilizationResult.efficiency === 'low') {
+        description += ' (利用率偏低)';
+      }
     } else {
-      description = `需要 ${multiCardRequired} 张卡并行运行`;
+      // 计算多卡配置
+      multiCardResult = utilizationCalculator.calculateMultiCardEfficiency(
+        totalMemory,
+        gpu.memorySize,
+        multiCardRequired
+      );
+      
+      const scalingEfficiency = (multiCardResult.scalingFactor / multiCardRequired * 100).toFixed(1);
+      description = `需要 ${multiCardRequired} 张卡并行运行，扩展效率 ${scalingEfficiency}%`;
+      
+      // 添加多卡建议
+      if (multiCardResult.optimalCardCount !== multiCardRequired) {
+        description += ` (建议 ${multiCardResult.optimalCardCount} 卡)`;
+      }
+    }
+    
+    // 确定效率等级
+    let efficiency: 'high' | 'medium' | 'low' = gpu.efficiency;
+    if (utilizationResult) {
+      efficiency = utilizationResult.efficiency;
+    } else if (multiCardResult && multiCardResult.scalingFactor < multiCardRequired * 0.7) {
+      efficiency = 'low';
     }
     
     recommendations.push({
       id: gpu.id,
       name: gpu.name,
-      memorySize: gpu.memorySize,
-      price: gpu.price,
+      memorySize: gpu.memorySize * multiCardRequired,
+      price: gpu.price * multiCardRequired,
       suitable,
       multiCardRequired,
-      efficiency: gpu.efficiency,
-      description
+      efficiency,
+      description,
+      // 添加增强信息
+      utilizationDetails: utilizationResult,
+      multiCardDetails: multiCardResult
+    } as HardwareRecommendation & {
+      utilizationDetails?: UtilizationResult;
+      multiCardDetails?: MultiCardResult;
     });
   });
   
@@ -119,15 +172,49 @@ export function generateHardwareRecommendations(totalMemory: number): HardwareRe
   return recommendations.sort((a, b) => {
     if (a.suitable && !b.suitable) return -1;
     if (!a.suitable && b.suitable) return 1;
+    
     if (a.suitable && b.suitable) {
-      // 都适用时，按内存利用率排序（接近但不超过最佳）
-      const aUtilization = totalMemory / a.memorySize;
-      const bUtilization = totalMemory / b.memorySize;
+      // 都适用时，按效率评级和利用率排序
+      const aEfficiencyScore = getEfficiencyScore(a.efficiency);
+      const bEfficiencyScore = getEfficiencyScore(b.efficiency);
+      
+      if (aEfficiencyScore !== bEfficiencyScore) {
+        return bEfficiencyScore - aEfficiencyScore;
+      }
+      
+      // 效率相同时，按内存利用率排序（接近但不超过最佳）
+      const aUtilization = totalMemory / (a.memorySize / a.multiCardRequired);
+      const bUtilization = totalMemory / (b.memorySize / b.multiCardRequired);
       return Math.abs(0.8 - aUtilization) - Math.abs(0.8 - bUtilization);
     }
-    // 都不适用时，按需要的卡数排序
-    return a.multiCardRequired - b.multiCardRequired;
+    
+    // 都不适用时，按需要的卡数和扩展效率排序
+    if (a.multiCardRequired !== b.multiCardRequired) {
+      return a.multiCardRequired - b.multiCardRequired;
+    }
+    
+    // 卡数相同时，按扩展效率排序
+    const aMultiCard = (a as any).multiCardDetails as MultiCardResult | undefined;
+    const bMultiCard = (b as any).multiCardDetails as MultiCardResult | undefined;
+    
+    if (aMultiCard && bMultiCard) {
+      return bMultiCard.scalingFactor - aMultiCard.scalingFactor;
+    }
+    
+    return 0;
   });
+}
+
+/**
+ * 获取效率评级的数值分数
+ */
+function getEfficiencyScore(efficiency: 'high' | 'medium' | 'low'): number {
+  switch (efficiency) {
+    case 'high': return 3;
+    case 'medium': return 2;
+    case 'low': return 1;
+    default: return 0;
+  }
 }
 
 /**

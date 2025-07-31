@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HardwareRecommendation } from '../../types';
 import { formatMemorySize, formatPrice } from '../../utils/formatters';
+import { UtilizationDisplay } from './UtilizationDisplay';
+import { EfficiencyRating } from './EfficiencyRating';
 
 export interface HardwareCardProps {
   hardware: HardwareRecommendation & { 
     memoryUtilization: number; 
     efficiencyScore: number; 
     costPerGB: number;
+    enhancedData?: {
+      architecture: string;
+      memoryBandwidth: number;
+      tdp: number;
+      benchmarks: any;
+      confidence: number;
+      efficiencyRating?: any;
+    };
   };
   rank: number;
   isSelected: boolean;
@@ -21,6 +31,8 @@ export const HardwareCard: React.FC<HardwareCardProps> = ({
   onSelect,
   memoryNeeded
 }) => {
+  const [showUtilizationDetails, setShowUtilizationDetails] = useState(false);
+  
   const handleSelect = () => {
     onSelect(hardware);
   };
@@ -123,13 +135,25 @@ export const HardwareCard: React.FC<HardwareCardProps> = ({
         <div className="metric-item">
           <div className="metric-icon">📊</div>
           <div className="metric-content">
-            <div className="metric-label">利用率</div>
+            <div className="metric-label">
+              {hardware.suitable ? '实际利用率' : '每卡利用率'}
+            </div>
             <div className="metric-value">
               {hardware.memoryUtilization.toFixed(1)}%
             </div>
           </div>
         </div>
       </div>
+
+      {/* 效率评级 */}
+      {hardware.enhancedData?.efficiencyRating && (
+        <div className="efficiency-rating-section">
+          <EfficiencyRating 
+            rating={hardware.enhancedData.efficiencyRating} 
+            compact={true}
+          />
+        </div>
+      )}
 
       {/* 详细信息 */}
       <div className="hardware-details">
@@ -165,18 +189,34 @@ export const HardwareCard: React.FC<HardwareCardProps> = ({
           <div 
             className="memory-used"
             style={{ 
-              width: `${Math.min(hardware.memoryUtilization, 100)}%`,
-              backgroundColor: hardware.memoryUtilization > 90 ? '#ef4444' : 
-                              hardware.memoryUtilization > 70 ? '#f59e0b' : '#10b981'
+              width: hardware.suitable ? `${Math.min(hardware.memoryUtilization, 100)}%` : '100%',
+              backgroundColor: hardware.memoryUtilization > 100 ? '#dc2626' : // 显存不足 - 深红色
+                              hardware.memoryUtilization > 90 ? '#ef4444' : // 利用率过高 - 红色
+                              hardware.memoryUtilization > 70 ? '#f59e0b' : '#10b981' // 正常范围
             }}
           />
+          {/* 当显存不足时，显示溢出指示器 */}
+          {!hardware.suitable && (
+            <div className="memory-overflow">
+              <span className="overflow-indicator">⚠️ 显存不足</span>
+            </div>
+          )}
         </div>
         <div className="memory-labels">
           <span className="memory-needed">
-            需求: {formatMemorySize(memoryNeeded)}
+            需求: {formatMemorySize(memoryNeeded / (1024 * 1024 * 1024))}
           </span>
           <span className="memory-total">
-            总计: {hardware.memorySize}GB
+            {hardware.suitable ? 
+              `单卡: ${hardware.memorySize / hardware.multiCardRequired}GB` :
+              `总计: ${hardware.memorySize}GB (需要${hardware.multiCardRequired}卡)`
+            }
+          </span>
+        </div>
+        {/* 显示实际利用率 */}
+        <div className="utilization-info">
+          <span className={`utilization-value ${hardware.memoryUtilization > 100 ? 'overflow' : ''}`}>
+            利用率: {hardware.memoryUtilization.toFixed(1)}%
           </span>
         </div>
       </div>
@@ -205,6 +245,28 @@ export const HardwareCard: React.FC<HardwareCardProps> = ({
           </ul>
         </div>
       </div>
+
+      {/* 利用率详情 */}
+      {(hardware.utilizationDetails || hardware.multiCardDetails) && (
+        <div className="utilization-section">
+          <button
+            className="toggle-utilization"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowUtilizationDetails(!showUtilizationDetails);
+            }}
+          >
+            {showUtilizationDetails ? '隐藏' : '显示'}利用率详情
+            <span className={`toggle-icon ${showUtilizationDetails ? 'expanded' : ''}`}>
+              ▼
+            </span>
+          </button>
+          
+          {showUtilizationDetails && (
+            <UtilizationDisplay hardware={hardware} />
+          )}
+        </div>
+      )}
 
       {/* 选择按钮 */}
       <div className="card-actions">

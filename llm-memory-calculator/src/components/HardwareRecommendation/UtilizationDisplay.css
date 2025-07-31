@@ -1,0 +1,486 @@
+.utilization-display {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.utilization-display h4 {
+  margin: 0 0 16px 0;
+  color: #495057;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.utilization-display h4::before {
+  content: '📊';
+  font-size: 18px;
+}
+
+.utilization-display h5 {
+  margin: 16px 0 8px 0;
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 利用率指标 */
+.utilization-metrics {
+  margin-bottom: 20px;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.metric-item {
+  text-align: center;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #495057;
+}
+
+.metric-value.optimal {
+  color: #28a745;
+}
+
+.metric-value.low {
+  color: #ffc107;
+}
+
+.metric-value.medium {
+  color: #17a2b8;
+}
+
+.metric-value.high {
+  color: #dc3545;
+}
+
+.metric-value.efficiency-high {
+  color: #28a745;
+}
+
+.metric-value.efficiency-medium {
+  color: #ffc107;
+}
+
+.metric-value.efficiency-low {
+  color: #dc3545;
+}
+
+.metric-value.excellent {
+  color: #28a745;
+}
+
+.metric-value.good {
+  color: #20c997;
+}
+
+.metric-value.fair {
+  color: #ffc107;
+}
+
+.metric-value.poor {
+  color: #dc3545;
+}
+
+/* 内存分解图表 */
+.memory-breakdown {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 16px;
+}
+
+.breakdown-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.breakdown-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 80px;
+  align-items: center;
+  gap: 12px;
+}
+
+.breakdown-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.breakdown-bar {
+  height: 20px;
+  background: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.breakdown-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.breakdown-fill.needed {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+}
+
+.breakdown-fill.fragmentation {
+  background: linear-gradient(90deg, #ffc107, #e0a800);
+}
+
+.breakdown-fill.system {
+  background: linear-gradient(90deg, #6c757d, #495057);
+}
+
+.breakdown-fill.safety {
+  background: linear-gradient(90deg, #28a745, #1e7e34);
+}
+
+.breakdown-value {
+  font-size: 11px;
+  color: #495057;
+  font-weight: 600;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.breakdown-percentage {
+  font-size: 10px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.capacity-warning {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* 错误状态样式 */
+.breakdown-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.error-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.error-message {
+  line-height: 1.4;
+}
+
+.breakdown-summary {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.summary-item:not(:last-child) {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.summary-label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #495057;
+  font-weight: 600;
+}
+
+/* 多卡配置 */
+.multi-card-utilization {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.multi-card-metrics {
+  margin-bottom: 20px;
+}
+
+.communication-overhead {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 16px;
+}
+
+.overhead-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.overhead-item:last-child {
+  border-bottom: none;
+}
+
+.overhead-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.overhead-value {
+  font-size: 13px;
+  color: #495057;
+  font-weight: 600;
+}
+
+.overhead-percentage {
+  font-size: 11px;
+  color: #6c757d;
+  margin-left: 4px;
+}
+
+/* 每卡利用率 */
+.per-card-utilization {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 16px;
+}
+
+.card-utilization-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-util-item {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.card-util-bar {
+  height: 16px;
+  background: #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.card-util-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}
+
+.card-util-fill.optimal {
+  background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.card-util-fill.low {
+  background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.card-util-fill.medium {
+  background: linear-gradient(90deg, #17a2b8, #007bff);
+}
+
+.card-util-fill.high {
+  background: linear-gradient(90deg, #dc3545, #c82333);
+}
+
+.card-util-value {
+  font-size: 11px;
+  color: #495057;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* 建议列表 */
+.utilization-recommendations,
+.multi-card-recommendations {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 16px;
+}
+
+.recommendation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 13px;
+  color: #495057;
+  line-height: 1.4;
+}
+
+.recommendation-item:not(:last-child) {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.recommendation-icon {
+  font-size: 14px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* 最优配置建议 */
+.optimal-config-suggestion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.suggestion-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.suggestion-content {
+  flex: 1;
+}
+
+.suggestion-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 4px;
+}
+
+.suggestion-text {
+  font-size: 13px;
+  color: #424242;
+  line-height: 1.4;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .metric-row {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  
+  .breakdown-item {
+    grid-template-columns: 80px 1fr 60px;
+    gap: 8px;
+  }
+  
+  .card-util-item {
+    grid-template-columns: 50px 1fr 50px;
+    gap: 8px;
+  }
+  
+  .optimal-config-suggestion {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .suggestion-icon {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .utilization-display {
+    padding: 12px;
+  }
+  
+  .metric-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .breakdown-item,
+  .card-util-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    text-align: center;
+  }
+  
+  .breakdown-bar,
+  .card-util-bar {
+    order: 2;
+  }
+  
+  .breakdown-value,
+  .card-util-value {
+    order: 3;
+    text-align: center;
+  }
+}

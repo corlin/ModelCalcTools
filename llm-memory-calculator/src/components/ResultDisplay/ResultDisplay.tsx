@@ -4,6 +4,7 @@ import { formatMemorySize, formatNumber } from '../../utils/formatters';
 import { MemoryBreakdown } from './MemoryBreakdown';
 import { MemoryWarnings } from './MemoryWarnings';
 import { ModeToggle } from './ModeToggle';
+import { MemoryBreakdownCalculator } from '../../utils/MemoryBreakdownCalculator';
 import './ResultDisplay.css';
 
 export interface ResultDisplayProps {
@@ -31,54 +32,34 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
     return mode === 'inference' ? result.inference.total : result.training.total;
   }, [result, mode]);
 
-  // 内存分解数据
+  // 内存分解数据 - 使用标准化的MemoryBreakdownCalculator
   const memoryBreakdown = useMemo(() => {
     if (!result) return [];
 
-    if (mode === 'inference') {
-      return [
-        {
-          label: '模型权重',
-          value: result.inference.modelWeights,
-          percentage: (result.inference.modelWeights / totalMemory) * 100,
-          color: '#3b82f6'
-        },
-        {
-          label: '激活值',
-          value: result.inference.activations,
-          percentage: (result.inference.activations / totalMemory) * 100,
-          color: '#10b981'
-        }
-      ];
-    } else {
-      return [
-        {
-          label: '模型权重',
-          value: result.training.modelWeights,
-          percentage: (result.training.modelWeights / totalMemory) * 100,
-          color: '#3b82f6'
-        },
-        {
-          label: '激活值',
-          value: result.training.activations,
-          percentage: (result.training.activations / totalMemory) * 100,
-          color: '#10b981'
-        },
-        {
-          label: '梯度',
-          value: result.training.gradients,
-          percentage: (result.training.gradients / totalMemory) * 100,
-          color: '#f59e0b'
-        },
-        {
-          label: '优化器状态',
-          value: result.training.optimizerStates,
-          percentage: (result.training.optimizerStates / totalMemory) * 100,
-          color: '#ef4444'
-        }
-      ];
+    // 使用标准化的内存分解计算器
+    const breakdownItems = MemoryBreakdownCalculator.calculateBreakdown(result, mode);
+    
+    // 验证分解数据
+    const validation = MemoryBreakdownCalculator.validateBreakdown(
+      breakdownItems, 
+      breakdownItems.reduce((sum, item) => sum + item.valueBytes, 0)
+    );
+    
+    if (!validation.isValid) {
+      console.warn('Memory breakdown validation failed in ResultDisplay:', validation.errors);
     }
-  }, [result, mode, totalMemory]);
+    if (validation.warnings.length > 0) {
+      console.info('Memory breakdown warnings in ResultDisplay:', validation.warnings);
+    }
+
+    // 转换为ResultDisplay组件期望的格式
+    return breakdownItems.map(item => ({
+      label: item.label,
+      value: item.valueBytes / (1024 * 1024 * 1024), // 转换回GB
+      percentage: item.percentage,
+      color: item.color
+    }));
+  }, [result, mode]);
 
   if (!result) {
     return (
