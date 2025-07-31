@@ -1,0 +1,370 @@
+/* Error State Component Styles */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid;
+  margin: 16px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error-state.error {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #dc2626;
+  color: #7f1d1d;
+}
+
+.error-state.warning {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.error-state.info {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #2563eb;
+  color: #1e40af;
+}
+
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid;
+}
+
+.error-state.error .error-header {
+  border-bottom-color: #fecaca;
+}
+
+.error-state.warning .error-header {
+  border-bottom-color: #fed7aa;
+}
+
+.error-state.info .error-header {
+  border-bottom-color: #bfdbfe;
+}
+
+.error-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.error-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error-message {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.error-suggestions {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid;
+}
+
+.error-state.error .error-suggestions {
+  border-color: #fecaca;
+}
+
+.error-state.warning .error-suggestions {
+  border-color: #fed7aa;
+}
+
+.error-state.info .error-suggestions {
+  border-color: #bfdbfe;
+}
+
+.error-suggestions p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.error-suggestions ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.error-suggestions li {
+  margin-bottom: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.error-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.error-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.error-button:active {
+  transform: translateY(0);
+}
+
+/* Error type specific button styles */
+.error-state.error .error-button.primary {
+  background: #dc2626;
+  color: white;
+  border: 2px solid #dc2626;
+}
+
+.error-state.error .error-button.primary:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.error-state.error .error-button.secondary {
+  background: transparent;
+  color: #7f1d1d;
+  border: 2px solid #7f1d1d;
+}
+
+.error-state.error .error-button.secondary:hover {
+  background: #7f1d1d;
+  color: white;
+}
+
+.error-state.warning .error-button.primary {
+  background: #d97706;
+  color: white;
+  border: 2px solid #d97706;
+}
+
+.error-state.warning .error-button.primary:hover {
+  background: #b45309;
+  border-color: #b45309;
+}
+
+.error-state.warning .error-button.secondary {
+  background: transparent;
+  color: #92400e;
+  border: 2px solid #92400e;
+}
+
+.error-state.warning .error-button.secondary:hover {
+  background: #92400e;
+  color: white;
+}
+
+.error-state.info .error-button.primary {
+  background: #2563eb;
+  color: white;
+  border: 2px solid #2563eb;
+}
+
+.error-state.info .error-button.primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.error-state.info .error-button.secondary {
+  background: transparent;
+  color: #1e40af;
+  border: 2px solid #1e40af;
+}
+
+.error-state.info .error-button.secondary:hover {
+  background: #1e40af;
+  color: white;
+}
+
+/* Loading Button States */
+.error-button.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.error-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.button-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: buttonSpin 1s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes buttonSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Progress Bar */
+.error-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid;
+}
+
+.error-state.error .error-progress {
+  border-top-color: #fecaca;
+}
+
+.error-state.warning .error-progress {
+  border-top-color: #fed7aa;
+}
+
+.error-state.info .error-progress {
+  border-top-color: #bfdbfe;
+}
+
+.error-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.error-progress-fill {
+  height: 100%;
+  background: currentColor;
+  border-radius: 2px;
+  animation: progressSlide 2s ease-in-out infinite;
+}
+
+.error-progress-text {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Enhanced Button Icons */
+.error-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.error-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.error-button:hover::before {
+  left: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .error-state {
+    padding: 16px;
+  }
+  
+  .error-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .error-icon {
+    font-size: 20px;
+  }
+  
+  .error-title {
+    font-size: 16px;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+  }
+  
+  .error-button {
+    width: 100%;
+  }
+  
+  .error-progress {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .error-progress-text {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-state {
+    padding: 12px;
+    margin: 12px 0;
+  }
+  
+  .error-title {
+    font-size: 14px;
+  }
+  
+  .error-message {
+    font-size: 13px;
+  }
+  
+  .error-suggestions {
+    padding: 8px;
+  }
+}

@@ -1,0 +1,553 @@
+/* Memory Warnings Component Styles */
+.memory-warnings {
+  margin: 20px 0;
+}
+
+.memory-warnings h4 {
+  margin: 0 0 16px 0;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-warnings h4::before {
+  content: '🔍';
+  font-size: 18px;
+}
+
+/* Warning Item Styles */
+.warning-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 2px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.warning-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0.3;
+}
+
+.warning-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Error Type Styles */
+.warning-item.error {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #dc2626;
+  color: #7f1d1d;
+}
+
+.warning-item.error::before {
+  background: linear-gradient(90deg, transparent, #dc2626, transparent);
+}
+
+.warning-item.error .warning-icon {
+  color: #dc2626;
+  animation: shake 2s infinite;
+}
+
+.warning-item.warning {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #d97706;
+  color: #92400e;
+}
+
+.warning-item.warning::before {
+  background: linear-gradient(90deg, transparent, #d97706, transparent);
+}
+
+.warning-item.warning .warning-icon {
+  color: #d97706;
+  animation: pulse 2s infinite;
+}
+
+.warning-item.info {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #2563eb;
+  color: #1e40af;
+}
+
+.warning-item.info::before {
+  background: linear-gradient(90deg, transparent, #2563eb, transparent);
+}
+
+.warning-item.info .warning-icon {
+  color: #2563eb;
+}
+
+.warning-item.success {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-color: #16a34a;
+  color: #14532d;
+}
+
+.warning-item.success::before {
+  background: linear-gradient(90deg, transparent, #16a34a, transparent);
+}
+
+.warning-item.success .warning-icon {
+  color: #16a34a;
+  animation: bounce 2s infinite;
+}
+
+/* Warning Icon */
+.warning-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Warning Content */
+.warning-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.warning-content h5 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.warning-item.error .warning-content h5 {
+  color: #991b1b;
+}
+
+.warning-item.warning .warning-content h5 {
+  color: #b45309;
+}
+
+.warning-item.info .warning-content h5 {
+  color: #1d4ed8;
+}
+
+.warning-item.success .warning-content h5 {
+  color: #15803d;
+}
+
+.warning-content p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Warning Suggestions */
+.warning-suggestions {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid;
+  margin-top: 8px;
+}
+
+.warning-item.error .warning-suggestions {
+  border-color: #fecaca;
+  background: rgba(254, 202, 202, 0.3);
+}
+
+.warning-item.warning .warning-suggestions {
+  border-color: #fed7aa;
+  background: rgba(254, 215, 170, 0.3);
+}
+
+.warning-item.info .warning-suggestions {
+  border-color: #bfdbfe;
+  background: rgba(191, 219, 254, 0.3);
+}
+
+.warning-item.success .warning-suggestions {
+  border-color: #bbf7d0;
+  background: rgba(187, 247, 208, 0.3);
+}
+
+.warning-suggestions ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.warning-suggestions li {
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 20px;
+}
+
+.warning-suggestions li::before {
+  content: '💡';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+}
+
+.warning-item.error .warning-suggestions li::before {
+  content: '🔧';
+}
+
+.warning-item.warning .warning-suggestions li::before {
+  content: '⚡';
+}
+
+.warning-item.success .warning-suggestions li::before {
+  content: '✨';
+}
+
+/* Enhanced Visual Elements */
+.memory-utilization-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+}
+
+.memory-utilization-badge.critical {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  animation: criticalPulse 1.5s infinite;
+}
+
+.memory-utilization-badge.high {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.memory-utilization-badge.optimal {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+}
+
+.memory-utilization-badge.low {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+}
+
+/* Progress Indicators */
+.memory-progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.memory-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.memory-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+  position: relative;
+}
+
+.memory-progress-fill.critical {
+  background: linear-gradient(90deg, #dc2626, #b91c1c);
+  animation: criticalGlow 2s infinite;
+}
+
+.memory-progress-fill.high {
+  background: linear-gradient(90deg, #d97706, #b45309);
+}
+
+.memory-progress-fill.optimal {
+  background: linear-gradient(90deg, #16a34a, #15803d);
+}
+
+.memory-progress-fill.low {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.memory-progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* GPU Recommendation Cards */
+.gpu-recommendation-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  transition: all 0.3s ease;
+}
+
+.gpu-recommendation-card:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gpu-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gpu-name {
+  font-weight: 600;
+  color: #374151;
+}
+
+.gpu-price {
+  font-size: 12px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.gpu-utilization {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Action Buttons */
+.warning-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.warning-action-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.warning-action-button.primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.warning-action-button.primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.warning-action-button.secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.warning-action-button.secondary:hover {
+  background: white;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+  60% { transform: translateY(-2px); }
+}
+
+@keyframes criticalPulse {
+  0%, 100% { 
+    opacity: 1; 
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  50% { 
+    opacity: 0.8; 
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+}
+
+@keyframes criticalGlow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 8px 2px rgba(220, 38, 38, 0.3);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .warning-item {
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .warning-icon {
+    font-size: 20px;
+    align-self: flex-start;
+  }
+  
+  .warning-content h5 {
+    font-size: 14px;
+  }
+  
+  .warning-content p {
+    font-size: 13px;
+  }
+  
+  .warning-suggestions li {
+    font-size: 12px;
+  }
+  
+  .memory-progress-indicator {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  
+  .memory-progress-text {
+    text-align: center;
+    min-width: auto;
+  }
+  
+  .warning-action-buttons {
+    justify-content: center;
+  }
+  
+  .gpu-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .memory-warnings {
+    margin: 16px 0;
+  }
+  
+  .warning-item {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .warning-content h5 {
+    font-size: 13px;
+  }
+  
+  .warning-content p {
+    font-size: 12px;
+  }
+  
+  .warning-suggestions {
+    padding: 8px;
+  }
+  
+  .warning-suggestions li {
+    font-size: 11px;
+    padding-left: 16px;
+  }
+  
+  .warning-action-button {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .warning-item {
+    border-width: 3px;
+  }
+  
+  .warning-item.error {
+    background: #fef2f2;
+    border-color: #dc2626;
+  }
+  
+  .warning-item.warning {
+    background: #fffbeb;
+    border-color: #d97706;
+  }
+  
+  .warning-item.info {
+    background: #eff6ff;
+    border-color: #2563eb;
+  }
+  
+  .warning-item.success {
+    background: #f0fdf4;
+    border-color: #16a34a;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .warning-item,
+  .warning-action-button,
+  .gpu-recommendation-card,
+  .memory-progress-fill {
+    transition: none;
+  }
+  
+  .warning-icon,
+  .memory-utilization-badge,
+  .memory-progress-fill {
+    animation: none;
+  }
+  
+  .warning-item:hover,
+  .warning-action-button:hover,
+  .gpu-recommendation-card:hover {
+    transform: none;
+  }
+}

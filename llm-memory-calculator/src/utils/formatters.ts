@@ -118,3 +118,109 @@ export const formatThroughput = (tokensPerSecond: number): string => {
     return `${tokensPerSecond.toFixed(1)} tokens/s`;
   }
 };
+
+/**
+ * 标准化数值精度格式化
+ */
+export const formatWithPrecision = (value: number, precision: number = 1): string => {
+  if (isNaN(value) || !isFinite(value)) {
+    return '0';
+  }
+  return value.toFixed(precision);
+};
+
+/**
+ * 标准化百分比格式化（统一精度）
+ */
+export const formatPercentageStandard = (value: number, total: number = 1, precision: number = 1): string => {
+  if (total === 0 || isNaN(value) || isNaN(total) || !isFinite(value) || !isFinite(total)) {
+    return '0%';
+  }
+  const percentage = (value / total) * 100;
+  return `${formatWithPrecision(percentage, precision)}%`;
+};
+
+/**
+ * 格式化利用率显示（带状态指示）
+ */
+export const formatUtilizationWithStatus = (utilization: number, precision: number = 1): {
+  text: string;
+  status: 'critical' | 'high' | 'optimal' | 'low';
+  color: string;
+} => {
+  const percentage = utilization * 100;
+  const text = `${formatWithPrecision(percentage, precision)}%`;
+  
+  let status: 'critical' | 'high' | 'optimal' | 'low';
+  let color: string;
+  
+  if (percentage > 100) {
+    status = 'critical';
+    color = '#dc2626';
+  } else if (percentage > 90) {
+    status = 'high';
+    color = '#d97706';
+  } else if (percentage >= 50 && percentage <= 85) {
+    status = 'optimal';
+    color = '#16a34a';
+  } else {
+    status = 'low';
+    color = '#2563eb';
+  }
+  
+  return { text, status, color };
+};
+
+/**
+ * 格式化内存大小（统一精度，支持bytes输入）
+ */
+export const formatMemorySizeStandard = (bytes: number, precision: number = 1): string => {
+  if (bytes === 0 || isNaN(bytes) || !isFinite(bytes)) {
+    return '0 B';
+  }
+  
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = Math.abs(bytes);
+  let unitIndex = 0;
+  
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  
+  // 对于小于1的值，显示更高精度
+  const displayPrecision = size < 1 ? Math.max(precision, 2) : precision;
+  
+  return `${formatWithPrecision(size, displayPrecision)} ${units[unitIndex]}`;
+};
+
+/**
+ * 格式化效率评分（统一显示）
+ */
+export const formatEfficiencyScore = (score: number): {
+  text: string;
+  level: 'excellent' | 'good' | 'fair' | 'poor';
+  color: string;
+} => {
+  const roundedScore = Math.round(Math.max(0, Math.min(100, score)));
+  const text = `${roundedScore}分`;
+  
+  let level: 'excellent' | 'good' | 'fair' | 'poor';
+  let color: string;
+  
+  if (roundedScore >= 85) {
+    level = 'excellent';
+    color = '#16a34a';
+  } else if (roundedScore >= 70) {
+    level = 'good';
+    color = '#059669';
+  } else if (roundedScore >= 50) {
+    level = 'fair';
+    color = '#d97706';
+  } else {
+    level = 'poor';
+    color = '#dc2626';
+  }
+  
+  return { text, level, color };
+};

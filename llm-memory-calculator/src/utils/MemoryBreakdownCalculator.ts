@@ -29,14 +29,14 @@ export class MemoryBreakdownCalculator {
         label: '模型权重',
         valueBytes: MemoryUnitConverter.gbToBytes(modeData.modelWeights),
         percentage: 0, // 将在后面计算
-        color: '#3b82f6',
+        color: '#2563eb', // 更深的蓝色，更好的对比度
         description: '存储模型参数的内存'
       },
       {
         label: '激活值',
         valueBytes: MemoryUnitConverter.gbToBytes(modeData.activations),
         percentage: 0, // 将在后面计算
-        color: '#10b981',
+        color: '#059669', // 更深的绿色，更好的对比度
         description: mode === 'inference' ? '前向传播中间结果' : '前向传播中间结果（需保存用于反向传播）'
       }
     ];
@@ -49,14 +49,14 @@ export class MemoryBreakdownCalculator {
           label: '梯度',
           valueBytes: MemoryUnitConverter.gbToBytes(trainingData.gradients),
           percentage: 0, // 将在后面计算
-          color: '#f59e0b',
+          color: '#d97706', // 更深的橙色，更好的对比度
           description: '反向传播计算的参数梯度'
         },
         {
           label: '优化器状态',
           valueBytes: MemoryUnitConverter.gbToBytes(trainingData.optimizerStates),
           percentage: 0, // 将在后面计算
-          color: '#ef4444',
+          color: '#dc2626', // 更深的红色，更好的对比度
           description: '优化器（如Adam）维护的动量和方差信息'
         }
       );

@@ -5,6 +5,10 @@ import { MemoryBreakdown } from './MemoryBreakdown';
 import { MemoryWarnings } from './MemoryWarnings';
 import { ModeToggle } from './ModeToggle';
 import { MemoryBreakdownCalculator } from '../../utils/MemoryBreakdownCalculator';
+import { MemoryDataValidator } from '../../utils/MemoryDataValidator';
+import { FallbackDisplayManager } from '../../utils/FallbackDisplayManager';
+import { LoadingState } from '../common/LoadingState';
+import { ErrorState } from '../common/ErrorState';
 import './ResultDisplay.css';
 
 export interface ResultDisplayProps {
@@ -14,6 +18,8 @@ export interface ResultDisplayProps {
   className?: string;
   showWarnings?: boolean;
   showBreakdown?: boolean;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 const ResultDisplay: React.FC<ResultDisplayProps> = ({
@@ -22,7 +28,9 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   onModeChange,
   className = '',
   showWarnings = true,
-  showBreakdown = true
+  showBreakdown = true,
+  isLoading = false,
+  error = null
 }) => {
   // 使用预计算的总内存值，确保与计算器结果一致
   const totalMemory = useMemo(() => {
@@ -36,31 +44,115 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   const memoryBreakdown = useMemo(() => {
     if (!result) return [];
 
-    // 使用标准化的内存分解计算器
-    const breakdownItems = MemoryBreakdownCalculator.calculateBreakdown(result, mode);
-    
-    // 验证分解数据
-    const validation = MemoryBreakdownCalculator.validateBreakdown(
-      breakdownItems, 
-      breakdownItems.reduce((sum, item) => sum + item.valueBytes, 0)
+    try {
+      // 验证计算结果数据
+      const validationResult = MemoryDataValidator.validateCalculationResult(result, mode);
+      if (!validationResult.isValid) {
+        console.warn('Memory calculation result validation failed in ResultDisplay:', validationResult.errors);
+        FallbackDisplayManager.logFallbackEvent('data_validation', new Error('Calculation result validation failed'), {
+          errors: validationResult.errors,
+          warnings: validationResult.warnings,
+          mode
+        });
+      }
+
+      // 使用标准化的内存分解计算器
+      const breakdownItems = MemoryBreakdownCalculator.calculateBreakdown(result, mode);
+      
+      // 验证分解数据
+      const validation = MemoryBreakdownCalculator.validateBreakdown(
+        breakdownItems, 
+        breakdownItems.reduce((sum, item) => sum + item.valueBytes, 0)
+      );
+      
+      if (!validation.isValid) {
+        console.warn('Memory breakdown validation failed in ResultDisplay:', validation.errors);
+        FallbackDisplayManager.logFallbackEvent('breakdown_display', new Error('Breakdown validation failed'), {
+          errors: validation.errors,
+          mode,
+          itemCount: breakdownItems.length
+        });
+        
+        // 如果验证失败严重，使用降级数据
+        if (breakdownItems.length === 0) {
+          const fallbackError = new Error('Memory breakdown calculation failed');
+          const fallbackItems = FallbackDisplayManager.getMemoryBreakdownFallback(fallbackError, totalMemory * 1024 * 1024 * 1024);
+          
+          return fallbackItems.map(item => ({
+            label: item.label,
+            value: item.valueBytes / (1024 * 1024 * 1024), // 转换回GB
+            percentage: item.percentage,
+            color: item.color
+          }));
+        }
+      }
+      
+      if (validation.warnings.length > 0) {
+        console.info('Memory breakdown warnings in ResultDisplay:', validation.warnings);
+      }
+
+      // 转换为ResultDisplay组件期望的格式
+      return breakdownItems.map(item => ({
+        label: item.label,
+        value: item.valueBytes / (1024 * 1024 * 1024), // 转换回GB
+        percentage: item.percentage,
+        color: item.color
+      }));
+    } catch (error) {
+      console.error('Error processing memory breakdown in ResultDisplay:', error);
+      FallbackDisplayManager.logFallbackEvent('breakdown_display', error as Error, {
+        mode,
+        totalMemory
+      });
+      
+      // 返回降级数据
+      const fallbackItems = FallbackDisplayManager.getMemoryBreakdownFallback(error as Error, totalMemory * 1024 * 1024 * 1024);
+      return fallbackItems.map(item => ({
+        label: item.label,
+        value: item.valueBytes / (1024 * 1024 * 1024), // 转换回GB
+        percentage: item.percentage,
+        color: item.color
+      }));
+    }
+  }, [result, mode, totalMemory]);
+
+  // 处理加载状态
+  if (isLoading) {
+    return (
+      <div className={`result-display loading ${className}`}>
+        <LoadingState 
+          message="正在计算内存需求..."
+          size="large"
+          type="spinner"
+        />
+      </div>
     );
-    
-    if (!validation.isValid) {
-      console.warn('Memory breakdown validation failed in ResultDisplay:', validation.errors);
-    }
-    if (validation.warnings.length > 0) {
-      console.info('Memory breakdown warnings in ResultDisplay:', validation.warnings);
-    }
+  }
 
-    // 转换为ResultDisplay组件期望的格式
-    return breakdownItems.map(item => ({
-      label: item.label,
-      value: item.valueBytes / (1024 * 1024 * 1024), // 转换回GB
-      percentage: item.percentage,
-      color: item.color
-    }));
-  }, [result, mode]);
+  // 处理错误状态
+  if (error) {
+    return (
+      <div className={`result-display error ${className}`}>
+        <ErrorState
+          title="计算失败"
+          message={error.message || '内存需求计算过程中出现错误'}
+          suggestions={[
+            '检查输入参数是否在合理范围内',
+            '尝试减少模型参数或批处理大小',
+            '刷新页面重新开始计算'
+          ]}
+          onRetry={() => window.location.reload()}
+          onReset={() => {
+            localStorage.clear();
+            window.location.reload();
+          }}
+          type="error"
+        />
+      </div>
+    );
+  }
 
+  // 处理空结果状态
   if (!result) {
     return (
       <div className={`result-display empty ${className}`}>
@@ -169,13 +261,13 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
           <div className="summary-item">
             <span className="summary-label">批处理大小</span>
             <span className="summary-value">
-              {result.parameters.batchSize}
+              {result.parameters.batchSize.toLocaleString()}
             </span>
           </div>
           <div className="summary-item">
             <span className="summary-label">序列长度</span>
             <span className="summary-value">
-              {formatNumber(result.parameters.sequenceLength)}
+              {result.parameters.sequenceLength.toLocaleString()}
             </span>
           </div>
           <div className="summary-item">
@@ -187,13 +279,13 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
           <div className="summary-item">
             <span className="summary-label">隐藏层维度</span>
             <span className="summary-value">
-              {formatNumber(result.parameters.hiddenSize)}
+              {result.parameters.hiddenSize.toLocaleString()}
             </span>
           </div>
           <div className="summary-item">
             <span className="summary-label">层数</span>
             <span className="summary-value">
-              {result.parameters.numLayers}
+              {result.parameters.numLayers.toLocaleString()}
             </span>
           </div>
         </div>

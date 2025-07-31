@@ -1,0 +1,238 @@
+/* Loading State Component Styles */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.loading-message {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+/* Spinner Loader */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner .spinner {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner.small .spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.loading-spinner.medium .spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.loading-spinner.large .spinner {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+/* Dots Loader */
+.loading-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dots .dot {
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots.small .dot {
+  width: 6px;
+  height: 6px;
+}
+
+.loading-dots.medium .dot {
+  width: 8px;
+  height: 8px;
+}
+
+.loading-dots.large .dot {
+  width: 12px;
+  height: 12px;
+}
+
+.loading-dots .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dots .dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+/* Pulse Loader */
+.loading-pulse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-pulse .pulse-circle {
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: pulseScale 1.5s ease-in-out infinite;
+}
+
+.loading-pulse.small .pulse-circle {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-pulse.medium .pulse-circle {
+  width: 32px;
+  height: 32px;
+}
+
+.loading-pulse.large .pulse-circle {
+  width: 48px;
+  height: 48px;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseScale {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Loading Progress Bar */
+.loading-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.loading-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  animation: progressGlow 2s ease-in-out infinite;
+}
+
+.loading-progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 35px;
+  text-align: right;
+}
+
+@keyframes progressGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Enhanced Loading Messages */
+.loading-message.with-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.loading-message-primary {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.loading-message-secondary {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .loading-state {
+    padding: 16px;
+    gap: 8px;
+  }
+  
+  .loading-message {
+    font-size: 13px;
+  }
+  
+  .loading-progress {
+    max-width: 150px;
+  }
+  
+  .loading-progress-text {
+    font-size: 11px;
+    min-width: 30px;
+  }
+}

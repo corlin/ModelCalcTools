@@ -2,6 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { MemoryCalculationResult, CalculationMode, HardwareRecommendation as HardwareRec } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { MemoryUnitConverter } from '../../utils/MemoryUnitConverter';
+import { MemoryDataValidator } from '../../utils/MemoryDataValidator';
+import { FallbackDisplayManager } from '../../utils/FallbackDisplayManager';
 import { ENHANCED_GPU_HARDWARE } from '../../constants';
 import { gpuDataValidator } from '../../utils/gpuDataValidator';
 import { HardwareCard } from './HardwareCard';
@@ -50,9 +52,20 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
   const recommendations = useMemo(() => {
     if (!result || totalMemoryNeededGB === 0) return [];
 
-    // 使用已经计算好的GB值
-    const memoryGB = totalMemoryNeededGB;
-    const gpuMemoryBytes = (gpu: any) => MemoryUnitConverter.gbToBytes(gpu.memorySize);
+    try {
+      // 验证计算结果数据
+      const validationResult = MemoryDataValidator.validateCalculationResult(result, mode);
+      if (!validationResult.isValid) {
+        console.warn('Hardware recommendation validation failed:', validationResult.errors);
+        FallbackDisplayManager.logFallbackEvent('memory_display', new Error('Validation failed'), {
+          errors: validationResult.errors,
+          warnings: validationResult.warnings
+        });
+      }
+
+      // 使用已经计算好的GB值
+      const memoryGB = totalMemoryNeededGB;
+      const gpuMemoryBytes = (gpu: any) => MemoryUnitConverter.gbToBytes(gpu.memorySize);
     
     // 验证并过滤有效的GPU数据，同时更新效率评级
     const workloadType: WorkloadType = mode === 'inference' ? 'inference' : 'training';
@@ -182,6 +195,19 @@ const HardwareRecommendation: React.FC<HardwareRecommendationProps> = ({
           return b.efficiencyScore - a.efficiencyScore;
       }
     });
+
+    } catch (error) {
+      console.error('Error generating hardware recommendations:', error);
+      FallbackDisplayManager.logFallbackEvent('memory_display', error as Error, {
+        totalMemoryNeededGB,
+        mode,
+        filterBudget,
+        sortBy
+      });
+      
+      // 返回空数组，让组件显示错误状态
+      return [];
+    }
   }, [result, totalMemoryNeededGB, totalMemoryNeededBytes, mode, filterBudget, sortBy, utilizationCalculator]);
 
   // 处理硬件选择

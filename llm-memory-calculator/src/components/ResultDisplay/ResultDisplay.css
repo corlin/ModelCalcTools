@@ -14,6 +14,19 @@
   min-height: 300px;
 }
 
+.result-display.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border: 2px dashed #cbd5e1;
+}
+
+.result-display.error {
+  min-height: 200px;
+}
+
 /* 空状态样式 */
 .empty-state {
   text-align: center;
