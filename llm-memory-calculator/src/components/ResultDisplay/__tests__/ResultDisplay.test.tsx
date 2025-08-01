@@ -58,13 +58,13 @@ describe('ResultDisplay Component', () => {
     );
 
     expect(screen.getByText('等待计算结果')).toBeInTheDocument();
-    expect(screen.getByText('请输入模型参数或选择预设模型来查看内存需求计算结果')).toBeInTheDocument();
+    expect(screen.getByText('请输入模型参数或选择预设模型来查看内存需求估算结果')).toBeInTheDocument();
   });
 
   test('应该渲染推理模式结果', () => {
     render(<ResultDisplay {...defaultProps} />);
 
-    expect(screen.getByText('内存需求计算结果')).toBeInTheDocument();
+    expect(screen.getByText('内存需求估算结果')).toBeInTheDocument();
     expect(screen.getByText('总内存需求')).toBeInTheDocument();
     expect(screen.getAllByText('推理模式')).toHaveLength(2); // 按钮和模式显示
     expect(screen.getAllByText('模型权重')).toHaveLength(3); // 图例、列表和详细表格
@@ -263,7 +263,7 @@ describe('ModeToggle Component', () => {
       />
     );
 
-    expect(screen.getByText('计算模式')).toBeInTheDocument();
+    expect(screen.getByText('估算模式')).toBeInTheDocument();
     expect(screen.getByText('推理模式')).toBeInTheDocument();
     expect(screen.getByText('训练模式')).toBeInTheDocument();
   });

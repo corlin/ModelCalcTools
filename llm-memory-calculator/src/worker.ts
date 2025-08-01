@@ -28,11 +28,11 @@ export default {
         <!DOCTYPE html>
         <html>
           <head>
-            <title>LLM Memory Calculator - Worker</title>
+            <title>大模型内存估算器 - Worker</title>
             <meta charset="utf-8">
           </head>
           <body>
-            <h1>LLM Memory Calculator</h1>
+            <h1>大模型内存估算器</h1>
             <p>Cloudflare Worker is running!</p>
             <p>Environment: ${env.NODE_ENV || 'development'}</p>
             <p>Request URL: ${url.pathname}</p>

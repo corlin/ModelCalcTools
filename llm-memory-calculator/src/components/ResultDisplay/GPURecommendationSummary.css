@@ -1,0 +1,326 @@
+.gpu-recommendation-summary {
+  background: var(--card-background, #ffffff);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #e1e5e9);
+}
+
+.summary-header h4 {
+  margin: 0;
+  color: var(--text-primary, #2c3e50);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.summary-subtitle {
+  color: var(--text-secondary, #7f8c8d);
+  font-size: 14px;
+}
+
+/* 最佳推荐 */
+.best-recommendation {
+  margin-bottom: 20px;
+}
+
+.recommendation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.badge-icon {
+  font-size: 14px;
+}
+
+.gpu-card-compact {
+  background: var(--card-background-secondary, #f8f9fa);
+  border: 1px solid var(--border-color-light, #e9ecef);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.gpu-info {
+  flex: 1;
+}
+
+.gpu-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+  margin-bottom: 4px;
+}
+
+.gpu-specs {
+  font-size: 14px;
+  color: var(--text-secondary, #7f8c8d);
+  margin-bottom: 8px;
+}
+
+.gpu-description {
+  font-size: 13px;
+  color: var(--text-tertiary, #95a5a6);
+  line-height: 1.4;
+}
+
+.utilization-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+}
+
+.utilization-bar {
+  width: 60px;
+  height: 8px;
+  background: var(--background-light, #ecf0f1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.utilization-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.utilization-fill.excellent {
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+}
+
+.utilization-fill.good {
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+}
+
+.utilization-fill.fair {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.utilization-fill.poor {
+  background: linear-gradient(90deg, #95a5a6, #7f8c8d);
+}
+
+.utilization-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+/* 其他推荐 */
+.other-recommendations {
+  margin-bottom: 20px;
+}
+
+.other-recommendations h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+}
+
+.recommendation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gpu-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--background-light, #f8f9fa);
+  border-radius: 6px;
+  border: 1px solid var(--border-color-light, #e9ecef);
+}
+
+.gpu-rank {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #7f8c8d);
+  min-width: 20px;
+}
+
+.gpu-info-mini {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gpu-name-mini {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #2c3e50);
+}
+
+.gpu-price-mini {
+  font-size: 12px;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+.gpu-utilization-mini {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #7f8c8d);
+  min-width: 40px;
+  text-align: right;
+}
+
+.gpu-status {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.gpu-status.compatible {
+  color: var(--success-color, #27ae60);
+}
+
+.gpu-status.incompatible {
+  color: var(--error-color, #e74c3c);
+}
+
+/* 操作区域 */
+.summary-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color-light, #e9ecef);
+}
+
+.view-full-button {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-full-button:hover {
+  background: linear-gradient(135deg, #2980b9, #1f5f8b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.quick-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+.stat-icon {
+  font-size: 14px;
+}
+
+/* 无兼容GPU状态 */
+.no-compatible-gpus {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--warning-background, #fff3cd);
+  border: 1px solid var(--warning-border, #ffeaa7);
+  border-radius: 8px;
+}
+
+.warning-icon {
+  font-size: 24px;
+  color: var(--warning-color, #f39c12);
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-content h5 {
+  margin: 0 0 8px 0;
+  color: var(--warning-text, #856404);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.warning-content p {
+  margin: 0 0 12px 0;
+  color: var(--warning-text, #856404);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.no-compatible-gpus .view-full-button {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.no-compatible-gpus .view-full-button:hover {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .gpu-card-compact {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .utilization-indicator {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: auto;
+  }
+  
+  .summary-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .quick-stats {
+    justify-content: center;
+  }
+  
+  .gpu-info-mini {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

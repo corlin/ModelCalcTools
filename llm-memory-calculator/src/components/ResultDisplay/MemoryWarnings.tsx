@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { MemoryCalculationResult, CalculationMode } from '../../types';
 import { MemoryUnitConverter } from '../../utils/MemoryUnitConverter';
+import { gpuRecommendationEngine } from '../../utils/gpuRecommendationEngine';
 import './MemoryWarnings.css';
-// import { GPU_HARDWARE } from '../../constants';
 
 export interface MemoryWarningsProps {
   totalMemory: number;
@@ -17,6 +17,28 @@ interface Warning {
   suggestions?: string[];
 }
 
+// 辅助函数：获取利用率描述
+const getUtilizationDescription = (rating: string): string => {
+  switch (rating) {
+    case 'excellent': return '最佳利用率，性能与效率平衡';
+    case 'good': return '良好利用率，推荐使用';
+    case 'fair': return '一般利用率，可以接受';
+    case 'poor': return '利用率较低，考虑其他选择';
+    default: return '利用率评估中';
+  }
+};
+
+// 辅助函数：获取效率描述
+const getEfficiencyDescription = (rating: string): string => {
+  switch (rating) {
+    case 'excellent': return '性价比极佳';
+    case 'good': return '性价比良好';
+    case 'fair': return '性价比一般';
+    case 'poor': return '性价比较低';
+    default: return '评估中';
+  }
+};
+
 export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
   totalMemory,
   mode,
@@ -24,59 +46,59 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
 }) => {
   const warnings = useMemo(() => {
     const warningList: Warning[] = [];
-    
-    // 检查内存是否超过常见GPU限制
-    const commonGPUs = [
-      { name: 'RTX 4090', memory: 24 * 1024 * 1024 * 1024, price: '约 ¥12,000' }, // 24GB
-      { name: 'RTX 3090', memory: 24 * 1024 * 1024 * 1024, price: '约 ¥8,000' }, // 24GB
-      { name: 'RTX 4080', memory: 16 * 1024 * 1024 * 1024, price: '约 ¥8,000' }, // 16GB
-      { name: 'RTX 3080', memory: 10 * 1024 * 1024 * 1024, price: '约 ¥4,000' }, // 10GB
-      { name: 'RTX 4070', memory: 12 * 1024 * 1024 * 1024, price: '约 ¥4,500' }, // 12GB
-    ];
 
-    // 计算内存利用率（使用标准化转换）
-    const memoryUtilizationGB = MemoryUnitConverter.bytesToGB(totalMemory);
+    // 使用统一的GPU推荐引擎
+    const recommendationResult = gpuRecommendationEngine.generateRecommendations(result, mode);
+    const compatibleGPUs = recommendationResult.recommendations.filter(r => r.suitable);
+    const incompatibleGPUs = recommendationResult.recommendations.filter(r => !r.suitable);
 
-    // 检查是否超过所有常见GPU的内存限制
-    const exceedsAllGPUs = commonGPUs.every(gpu => totalMemory > gpu.memory);
-    if (exceedsAllGPUs) {
-      const reductionNeeded = MemoryUnitConverter.bytesToGB(totalMemory - commonGPUs[0].memory);
-      warningList.push({
-        type: 'error',
-        title: '内存需求严重超标',
-        message: `当前配置需要 ${MemoryUnitConverter.formatMemorySize(totalMemory, 1)} 内存，超过了所有常见消费级GPU的显存容量。需要减少至少 ${reductionNeeded.toFixed(1)}GB 内存使用。`,
-        suggestions: [
-          `减少批处理大小至 ${Math.max(1, Math.floor(result.parameters.batchSize * 0.5))} 或更小`,
-          `使用更小的模型（如7B参数模型替代13B+模型）`,
-          `启用梯度检查点技术可节省约30-50%内存`,
-          `考虑使用专业级GPU：A100 (80GB) 或 H100 (80GB)`,
-          `使用模型并行：将模型分布到多张GPU上`,
-          `CPU推理作为备选方案（速度较慢但无显存限制）`
-        ]
-      });
-    } else {
-      // 找到可以运行的GPU和刚好不够的GPU
-      const compatibleGPUs = commonGPUs.filter(gpu => totalMemory <= gpu.memory);
-      const incompatibleGPUs = commonGPUs.filter(gpu => totalMemory > gpu.memory);
+    // 检查是否超过所有GPU的内存限制
+    if (compatibleGPUs.length === 0) {
+      const largestGPU = recommendationResult.recommendations
+        .sort((a, b) => b.memorySize - a.memorySize)[0];
       
-      if (compatibleGPUs.length > 0) {
-        const bestGPU = compatibleGPUs[compatibleGPUs.length - 1]; // 最便宜的兼容GPU
-        const utilizationPercent = MemoryUnitConverter.calculatePercentage(totalMemory, bestGPU.memory, 1);
-        const utilizationLevel = utilizationPercent > 90 ? 'critical' : utilizationPercent > 75 ? 'high' : utilizationPercent > 50 ? 'optimal' : 'low';
-        
+      if (largestGPU) {
+        const reductionNeeded = MemoryUnitConverter.bytesToGB(totalMemory - MemoryUnitConverter.gbToBytes(largestGPU.memorySize));
+
+        warningList.push({
+          type: 'error',
+          title: '内存需求严重超标',
+          message: `当前配置需要 ${MemoryUnitConverter.formatMemorySize(totalMemory, 1)} 内存，超过了所有可用GPU的显存容量。需要减少至少 ${reductionNeeded.toFixed(1)}GB 内存使用。`,
+          suggestions: [
+            `减少批处理大小至 ${Math.max(1, Math.floor(result.parameters.batchSize * 0.5))} 或更小`,
+            `使用更小的模型（如7B参数模型替代13B+模型）`,
+            `启用梯度检查点技术可节省约30-50%内存`,
+            `考虑使用专业级GPU：A100 (80GB) 或 H100 (80GB)`,
+            `使用模型并行：将模型分布到多张GPU上`,
+            `CPU推理作为备选方案（速度较慢但无显存限制）`
+          ]
+        });
+      }
+    } else {
+      // 获取最佳推荐GPU
+      const bestGPU = recommendationResult.bestRecommendation;
+      
+      if (bestGPU) {
+        const utilizationPercent = bestGPU.memoryUtilization;
+        const utilizationLevel = bestGPU.standardizedUtilization.efficiencyRating;
+        const price = `约 ¥${Math.round(bestGPU.price * 7.2 / 1000)}K`;
+
         warningList.push({
           type: 'info',
           title: '推荐GPU配置',
-          message: `当前配置可以在以下GPU上运行，推荐 ${bestGPU.name} (${utilizationPercent}% 利用率，${bestGPU.price})
+          message: `当前配置可以在以下GPU上运行，推荐 ${bestGPU.name} (${utilizationPercent.toFixed(1)}% 利用率，${price})
             <div class="memory-progress-indicator">
               <div class="memory-progress-bar">
                 <div class="memory-progress-fill ${utilizationLevel}" style="width: ${Math.min(utilizationPercent, 100)}%"></div>
               </div>
-              <div class="memory-progress-text">${utilizationPercent}%</div>
+              <div class="memory-progress-text">${utilizationPercent.toFixed(1)}%</div>
             </div>`,
           suggestions: [
-            `兼容GPU列表：${compatibleGPUs.map(gpu => `${gpu.name} (${gpu.price})`).join('、')}`,
-            incompatibleGPUs.length > 0 ? `不兼容：${incompatibleGPUs.map(gpu => gpu.name).join('、')} - 显存不足` : null
+            `💡 最佳选择：${bestGPU.name} - 效率评级 ${bestGPU.standardizedUtilization.efficiencyRating}`,
+            `📊 兼容GPU：${compatibleGPUs.slice(0, 3).map(gpu => `${gpu.name} (约 ¥${Math.round(gpu.price * 7.2 / 1000)}K)`).join('、')}`,
+            incompatibleGPUs.length > 0 ? `❌ 不兼容：${incompatibleGPUs.slice(0, 3).map(gpu => gpu.name).join('、')} - 显存不足` : null,
+            `⚡ 利用率：${utilizationPercent.toFixed(1)}% - ${getUtilizationDescription(bestGPU.standardizedUtilization.efficiencyRating)}`,
+            `💰 成本效益：${price} - ${getEfficiencyDescription(bestGPU.standardizedUtilization.efficiencyRating)}`
           ].filter(Boolean) as string[]
         });
       }
@@ -86,11 +108,11 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
     if (result.parameters.batchSize > 32) {
       const recommendedBatchSize = Math.max(1, Math.floor(result.parameters.batchSize * 0.6));
       const memoryReduction = MemoryUnitConverter.calculatePercentage(
-        result.parameters.batchSize - recommendedBatchSize, 
-        result.parameters.batchSize, 
+        result.parameters.batchSize - recommendedBatchSize,
+        result.parameters.batchSize,
         0
       );
-      
+
       warningList.push({
         type: 'warning',
         title: '批处理大小过大',
@@ -102,7 +124,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
           `如需保持大批处理：考虑升级到更大显存的GPU`
         ]
       });
-    } else if (result.parameters.batchSize > 16 && memoryUtilizationGB > 20) {
+    } else if (result.parameters.batchSize > 16 && MemoryUnitConverter.bytesToGB(totalMemory) > 20) {
       warningList.push({
         type: 'info',
         title: '批处理优化建议',
@@ -119,7 +141,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
       const recommendedLength = Math.min(4096, Math.floor(result.parameters.sequenceLength * 0.75));
       const memoryImpact = Math.pow(result.parameters.sequenceLength / 2048, 2); // 序列长度对内存的二次方影响
       const impactPercentage = (memoryImpact * 100 - 100).toFixed(0);
-      
+
       warningList.push({
         type: 'warning',
         title: '序列长度过长',
@@ -132,7 +154,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
           `使用稀疏注意力机制减少内存占用`
         ]
       });
-    } else if (result.parameters.sequenceLength > 2048 && memoryUtilizationGB > 15) {
+    } else if (result.parameters.sequenceLength > 2048 && MemoryUnitConverter.bytesToGB(totalMemory) > 15) {
       warningList.push({
         type: 'info',
         title: '序列长度优化建议',
@@ -155,7 +177,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
           totalMemory,
           1
         );
-        
+
         warningList.push({
           type: 'warning',
           title: '训练内存开销过高',
@@ -175,7 +197,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
           totalMemory,
           1
         );
-        
+
         warningList.push({
           type: 'info',
           title: '训练内存优化建议',
@@ -192,7 +214,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
     if (result.parameters.precision === 'fp32') {
       const fp16SavingsBytes = totalMemory * 0.5;
       const fp16Savings = MemoryUnitConverter.bytesToGB(fp16SavingsBytes);
-      
+
       warningList.push({
         type: 'info',
         title: '精度优化建议',
@@ -260,10 +282,10 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
                 <span className="memory-utilization-badge high">注意</span>
               )}
             </h5>
-            <div 
-              dangerouslySetInnerHTML={{ 
-                __html: warning.message.replace(/\n/g, '<br/>') 
-              }} 
+            <div
+              dangerouslySetInnerHTML={{
+                __html: warning.message.replace(/\n/g, '<br/>')
+              }}
             />
             {warning.suggestions && (
               <div className="warning-suggestions">
@@ -274,7 +296,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
                 </ul>
                 {(warning.type === 'error' || warning.type === 'warning') && (
                   <div className="warning-action-buttons">
-                    <button 
+                    <button
                       className="warning-action-button primary"
                       onClick={() => {
                         // 可以添加自动优化功能
@@ -283,7 +305,7 @@ export const MemoryWarnings: React.FC<MemoryWarningsProps> = ({
                     >
                       🔧 自动优化
                     </button>
-                    <button 
+                    <button
                       className="warning-action-button secondary"
                       onClick={() => {
                         // 可以添加详细说明功能

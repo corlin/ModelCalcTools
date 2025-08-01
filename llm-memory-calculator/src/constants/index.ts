@@ -28,10 +28,10 @@ export const MODEL_CATEGORY_LABELS: Record<ModelCategory, string> = {
 
 // 默认模型参数
 export const DEFAULT_MODEL_PARAMS = {
-  parameterCount: 7,
+  parameterCount: 8,
   precision: 'fp16' as PrecisionType,
-  sequenceLength: 2048,
-  batchSize: 1,
+  sequenceLength: 4096,
+  batchSize: 2,
   hiddenSize: 4096,
   numLayers: 32,
   vocabularySize: 32000,
@@ -69,49 +69,49 @@ export const GPU_HARDWARE = [
     id: 'rtx-4090',
     name: 'RTX 4090',
     memorySize: 24,
-    price: 1599,
+    price: 18000,
     efficiency: 'high' as const,
   },
   {
     id: 'rtx-4080',
     name: 'RTX 4080',
     memorySize: 16,
-    price: 1199,
+    price: 8000,
     efficiency: 'high' as const,
   },
   {
     id: 'rtx-3090',
     name: 'RTX 3090',
     memorySize: 24,
-    price: 999,
+    price: 6000,
     efficiency: 'medium' as const,
   },
   {
     id: 'a100-40gb',
     name: 'A100 40GB',
     memorySize: 40,
-    price: 10000,
+    price: 80000,
     efficiency: 'high' as const,
   },
   {
     id: 'a100-80gb',
     name: 'A100 80GB',
     memorySize: 80,
-    price: 15000,
+    price: 180000,
     efficiency: 'high' as const,
   },
   {
     id: 'h100',
     name: 'H100',
     memorySize: 80,
-    price: 25000,
+    price: 180000,
     efficiency: 'high' as const,
   },
   {
     id: 'v100',
     name: 'V100',
     memorySize: 32,
-    price: 8000,
+    price: 18000,
     efficiency: 'medium' as const,
   },
 ];
@@ -136,7 +136,7 @@ export const ENHANCED_GPU_HARDWARE = [
       regionPrices: {
         'US': 1699,
         'EU': 1899,
-        'CN': 12999,              // CNY
+        'CN': 18000,              // CNY
         'JP': 249800              // JPY
       },
       currency: 'USD',
@@ -203,7 +203,7 @@ export const ENHANCED_GPU_HARDWARE = [
       regionPrices: {
         'US': 1299,
         'EU': 1449,
-        'CN': 9999,
+        'CN': 8000,
         'JP': 189800
       },
       currency: 'USD',
@@ -270,7 +270,7 @@ export const ENHANCED_GPU_HARDWARE = [
       regionPrices: {
         'US': 16500,
         'EU': 18000,
-        'CN': 120000,
+        'CN': 160000,
         'JP': 2400000
       },
       currency: 'USD',
@@ -337,7 +337,7 @@ export const ENHANCED_GPU_HARDWARE = [
       regionPrices: {
         'US': 28000,
         'EU': 31000,
-        'CN': 200000,
+        'CN': 180000,
         'JP': 4200000
       },
       currency: 'USD',
@@ -427,8 +427,8 @@ export const GPU_VALIDATION_RULES = {
     required: true
   },
   price: {
-    msrp: { min: 100, max: 100000 },
-    currentPrice: { min: 50, max: 150000 }
+    msrp: { min: 100, max: 1000000 },
+    currentPrice: { min: 50, max: 1500000 }
   },
   benchmarks: {
     required: ['llmInference', 'syntheticBenchmarks'],

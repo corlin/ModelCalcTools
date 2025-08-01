@@ -118,13 +118,13 @@ interface BenchmarkData {
 const GPUValidationSchema = {
   memorySize: {
     min: 1,
-    max: 1000,
+    max: 2000,
     type: 'number',
     required: true
   },
   price: {
-    msrp: { min: 100, max: 100000 },
-    currentPrice: { min: 50, max: 150000 }
+    msrp: { min: 100, max: 1000000 },
+    currentPrice: { min: 50, max: 1500000 }
   },
   benchmarks: {
     required: ['llmInference', 'syntheticBenchmarks'],

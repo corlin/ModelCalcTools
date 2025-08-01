@@ -105,8 +105,8 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="header-title">
-            <h1>大模型内存需求计算工具</h1>
-            <p>精确计算大语言模型GPU内存需求的专业工具</p>
+            <h1>大模型内存估算器</h1>
+            <p>精确估算大语言模型GPU内存需求的专业工具</p>
           </div>
           
           <div className="header-actions">
@@ -200,7 +200,7 @@ function App() {
                 <span className="info-value">{currentParams.parameterCount}B</span>
               </div>
               <div className="info-item">
-                <span className="info-label">计算模式</span>
+                <span className="info-label">估算模式</span>
                 <span className="info-value">
                   {calculationMode === 'inference' ? '推理' : '训练'}
                 </span>
@@ -281,6 +281,8 @@ function App() {
                   onModeChange={handleModeChange}
                   showWarnings={true}
                   showBreakdown={true}
+                  showGPURecommendation={true}
+                  onViewHardwareRecommendations={() => handleViewChange('hardware')}
                 />
               </div>
             )}

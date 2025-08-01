@@ -14,7 +14,7 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({
 }) => {
   return (
     <div className="mode-toggle">
-      <div className="toggle-label">计算模式</div>
+      <div className="toggle-label">估算模式</div>
       <div className="toggle-buttons">
         <button
           className={`toggle-button ${mode === 'inference' ? 'active' : ''}`}

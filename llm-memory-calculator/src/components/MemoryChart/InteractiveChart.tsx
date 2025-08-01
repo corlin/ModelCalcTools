@@ -72,7 +72,7 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
 
         {onModeChange && (
           <div className="control-group">
-            <label className="control-label">计算模式</label>
+            <label className="control-label">估算模式</label>
             <button
               className="mode-switch"
               onClick={handleModeToggle}

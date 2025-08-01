@@ -1,6 +1,6 @@
-# LLM Memory Calculator | 大模型内存计算器
+# 大模型内存估算器 | LLM Memory Estimator
 
-一个基于 React + TypeScript 的大语言模型 GPU 内存需求计算工具，帮助 AI 研究者和开发者准确估算运行不同大模型所需的硬件资源。
+一个基于 React + TypeScript 的大语言模型 GPU 内存需求估算工具，帮助 AI 研究者和开发者准确估算运行不同大模型所需的硬件资源。
 
 ## ✨ 功能特性
 

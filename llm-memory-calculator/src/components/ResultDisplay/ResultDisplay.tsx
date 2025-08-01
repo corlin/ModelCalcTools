@@ -3,6 +3,7 @@ import { MemoryCalculationResult, CalculationMode } from '../../types';
 import { formatMemorySize, formatNumber } from '../../utils/formatters';
 import { MemoryBreakdown } from './MemoryBreakdown';
 import { MemoryWarnings } from './MemoryWarnings';
+import { GPURecommendationSummary } from './GPURecommendationSummary';
 import { ModeToggle } from './ModeToggle';
 import { MemoryBreakdownCalculator } from '../../utils/MemoryBreakdownCalculator';
 import { MemoryDataValidator } from '../../utils/MemoryDataValidator';
@@ -18,8 +19,10 @@ export interface ResultDisplayProps {
   className?: string;
   showWarnings?: boolean;
   showBreakdown?: boolean;
+  showGPURecommendation?: boolean;
   isLoading?: boolean;
   error?: Error | null;
+  onViewHardwareRecommendations?: () => void;
 }
 
 const ResultDisplay: React.FC<ResultDisplayProps> = ({
@@ -29,8 +32,10 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   className = '',
   showWarnings = true,
   showBreakdown = true,
+  showGPURecommendation = true,
   isLoading = false,
-  error = null
+  error = null,
+  onViewHardwareRecommendations
 }) => {
   // 使用预计算的总内存值，确保与计算器结果一致
   const totalMemory = useMemo(() => {
@@ -135,7 +140,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
       <div className={`result-display error ${className}`}>
         <ErrorState
           title="计算失败"
-          message={error.message || '内存需求计算过程中出现错误'}
+          message={error.message || '内存需求估算过程中出现错误'}
           suggestions={[
             '检查输入参数是否在合理范围内',
             '尝试减少模型参数或批处理大小',
@@ -159,7 +164,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
         <div className="empty-state">
           <div className="empty-icon">📊</div>
           <h3>等待计算结果</h3>
-          <p>请输入模型参数或选择预设模型来查看内存需求计算结果</p>
+          <p>请输入模型参数或选择预设模型来查看内存需求估算结果</p>
         </div>
       </div>
     );
@@ -169,7 +174,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
     <div className={`result-display ${className}`}>
       {/* 头部控制区 */}
       <div className="result-header">
-        <h3>内存需求计算结果</h3>
+        <h3>内存需求估算结果</h3>
         <ModeToggle
           mode={mode}
           onModeChange={onModeChange}
@@ -239,6 +244,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
         </div>
       </div>
 
+      {/* GPU推荐摘要 */}
+      {showGPURecommendation && (
+        <GPURecommendationSummary
+          result={result}
+          mode={mode}
+          onViewFullRecommendations={onViewHardwareRecommendations}
+        />
+      )}
+
       {/* 内存警告和建议 */}
       {showWarnings && (
         <MemoryWarnings
@@ -250,7 +264,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
 
       {/* 计算参数摘要 */}
       <div className="calculation-summary">
-        <h4>计算参数</h4>
+        <h4>估算参数</h4>
         <div className="summary-grid">
           <div className="summary-item">
             <span className="summary-label">参数量</span>
